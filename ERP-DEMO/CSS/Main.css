@@ -1,0 +1,57 @@
+/* css/main.css */
+:root {
+    /* Paleta de colores - Morado Pastel */
+    --primary-purple: #A288E3;       /* Morado pastel principal */
+    --light-purple: #EFE9FB;         /* Fondo lila muy claro */
+    --gradient-purple: #B9A2EB;      /* Morado para gradientes */
+    --dark-purple: #8B6BCE;          /* Morado más oscuro para hover y botones */
+    
+    /* Colores de texto y fondos */
+    --text-main: #2C2C2C;            /* Texto principal (casi negro) */
+    --text-muted: #6B7280;           /* Texto secundario (gris) */
+    --bg-app: #F8F7FA;               /* Fondo general de la aplicación */
+    --white: #FFFFFF;
+    
+    /* Bordes y sombras */
+    --border-color: #E5E7EB;
+    --shadow-sm: 0 4px 6px rgba(162, 136, 227, 0.1);
+    --shadow-md: 0 10px 25px rgba(162, 136, 227, 0.15);
+    
+    /* Tipografía */
+    --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Reseteo global */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Estilos de inputs compartidos */
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(162, 136, 227, 0.2);
+}

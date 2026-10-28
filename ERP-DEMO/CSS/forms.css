@@ -1,0 +1,150 @@
+/* css/forms.css */
+
+/* Cabecera / Breadcrumb */
+.breadcrumb {
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+}
+.breadcrumb a {
+    color: var(--primary-purple);
+    text-decoration: none;
+}
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+.breadcrumb .separator {
+    margin: 0 5px;
+}
+
+/* Tarjeta del Formulario */
+.form-card {
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto 40px auto; /* Centrado horizontal, con 40px de margen inferior */
+}
+
+.form-card-header {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.required {
+    color: #dc2626; /* Rojo para asteriscos requeridos */
+}
+
+/* Layout de Secciones de Formulario */
+.form-section {
+    display: flex;
+    gap: 40px;
+    padding: 30px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Para la última sección quitamos el borde inferior */
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+/* Columna Izquierda (Información) */
+.form-section-info {
+    flex: 1;
+    min-width: 200px;
+}
+.form-section-info h3 {
+    font-size: 15px;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+.form-section-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+.form-section-info .note {
+    margin-top: 15px;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Columna Derecha (Campos de Input) */
+.form-section-fields {
+    flex: 2;
+}
+
+/* Utilidad para 2 columnas en campos de la derecha */
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Elementos de Formulario (Selects, Textarea) */
+select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    background-color: var(--white);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    appearance: none; /* Remueve estilo por defecto para personalización */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 12px;
+}
+
+select:focus,
+textarea:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(162, 136, 227, 0.2);
+}
+
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+}
+
+.char-count {
+    display: block;
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* Acciones Finales (Botones) */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Responsividad para móviles */
+@media (max-width: 768px) {
+    .form-section {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .grid-2-cols {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Factura - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+    <link rel="stylesheet" href="../../CSS/forms.css">
+    <style>
+        /* Estilos específicos para la tabla dinámica de conceptos */
+        .concept-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .concept-table th { text-align: left; padding: 10px; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border-color); }
+        .concept-table td { padding: 10px; border-bottom: 1px solid var(--border-color); }
+        .concept-table input { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; }
+        .concept-table input:focus { border-color: var(--primary-purple); outline: none; }
+        .btn-add-row { background: none; border: none; color: var(--primary-purple); font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- BARRA LATERAL ESTANDARIZADA -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><span class="logo-icon">N</span><div class="logo-text"><strong>ERP EMPRESARIAL</strong><span>Portal de empresa</span></div></div>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">LM</div><div class="user-info"><strong>Laura Martínez</strong><span>Administrador</span></div>
+            </div>
+            <nav class="sidebar-menu">
+                <p class="menu-label">GENERAL</p>
+                <ul>
+                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li><a href="operaciones.html">Operaciones</a></li>
+                    <li class="active"><a href="facturacion.html">Facturación</a></li>
+                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
+                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
+                    <li><a href="notas-credito.html">Notas de crédito</a></li>
+                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-titles">
+                    <div class="breadcrumb"><a href="facturacion.html">Facturación</a> <span class="separator">/</span> <strong>Nueva Factura</strong></div>
+                    <h1>Crear Factura</h1>
+                    <p>Emisión de documento tributario electrónico.</p>
+                </div>
+            </header>
+
+            <div class="card form-card">
+                <form action="facturacion.html" method="GET">
+                    
+                    <!-- Datos Base -->
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Datos de Emisión</h3>
+                            <p>Selecciona el cliente y las condiciones de pago.</p>
+                        </div>
+                        <div class="form-section-fields grid-2-cols">
+                            <div class="form-group">
+                                <label>Cliente <span class="required">*</span></label>
+                                <input type="text" list="clientesList" placeholder="Buscar por Nombre o RUT..." required>
+                                <datalist id="clientesList">
+                                    <option value="Norte Sur S.A. | 76.234.567-8"></option>
+                                    <option value="Import. Andina SpA | 76.123.456-7"></option>
+                                </datalist>
+                            </div>
+                            <div class="form-group">
+                                <label>Operación Asociada (Opcional)</label>
+                                <input type="text" placeholder="Ej. OP-001">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha de Vencimiento <span class="required">*</span></label>
+                                <select required>
+                                    <option value="30">Neto 30 días</option>
+                                    <option value="60">Neto 60 días</option>
+                                    <option value="contado">Al contado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conceptos -->
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Detalle de Conceptos</h3>
+                            <p>Agrega los servicios o productos a facturar.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <table class="concept-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50%;">Descripción</th>
+                                        <th style="width: 15%;">Cant.</th>
+                                        <th style="width: 20%;">Precio Unit.</th>
+                                        <th style="width: 15%;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" placeholder="Ej. Flete Internacional"></td>
+                                        <td><input type="number" placeholder="1" value="1"></td>
+                                        <td><input type="text" placeholder="€ 0.00"></td>
+                                        <td><input type="text" placeholder="€ 0.00" readonly style="background: #f9f9f9;"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn-add-row">+ Agregar otra línea</button>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="facturacion.html" class="btn-secondary" style="text-decoration: none;">Cancelar</a>
+                        <button type="submit" class="btn-primary">✓ Emitir Factura</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script src="../../JS/sidebar.js"></script>
+</body>
+</html>

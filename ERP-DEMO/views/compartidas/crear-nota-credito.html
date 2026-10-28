@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emitir Nota de Crédito - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+    <link rel="stylesheet" href="../../CSS/forms.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- BARRA LATERAL ESTANDARIZADA -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><span class="logo-icon">N</span><div class="logo-text"><strong>ERP EMPRESARIAL</strong><span>Portal de empresa</span></div></div>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">LM</div><div class="user-info"><strong>Laura Martínez</strong><span>Administrador</span></div>
+            </div>
+            <nav class="sidebar-menu">
+                <p class="menu-label">GENERAL</p>
+                <ul>
+                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li><a href="operaciones.html">Operaciones</a></li>
+                    <li><a href="facturacion.html">Facturación</a></li>
+                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
+                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
+                    <li class="active"><a href="notas-credito.html">Notas de crédito</a></li>
+                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-titles">
+                    <div class="breadcrumb"><a href="notas-credito.html">Notas de crédito</a> <span class="separator">/</span> <strong>Emitir Nota de Crédito</strong></div>
+                    <h1>Emitir Nota de Crédito</h1>
+                    <p>Registra rebajas, descuentos o anula facturas emitidas previamente.</p>
+                </div>
+            </header>
+
+            <div class="card form-card">
+                <form action="notas-credito.html" method="GET">
+                    
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Documento de Referencia</h3>
+                            <p>Identifica la factura original a la que se aplicará la nota de crédito.</p>
+                        </div>
+                        <div class="form-section-fields grid-2-cols">
+                            <div class="form-group">
+                                <label>Factura de Origen <span class="required">*</span></label>
+                                <input type="text" list="facturasList" placeholder="Ej. FAC-2026-..." required>
+                                <datalist id="facturasList">
+                                    <option value="FAC-2026-1042 | Import. Andina SpA"></option>
+                                    <option value="FAC-2026-1038 | Exportadora Sur"></option>
+                                </datalist>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Nota de Crédito <span class="required">*</span></label>
+                                <select required>
+                                    <option value="" disabled selected>Seleccionar tipo</option>
+                                    <option value="anulacion">Anulación total de la factura</option>
+                                    <option value="descuento">Descuento o rebaja (Parcial)</option>
+                                    <option value="devolucion">Devolución de mercancía</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Detalle Económico</h3>
+                            <p>Especifica el monto a rebajar y la justificación contable.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <div class="form-group">
+                                <label>Monto Neto a Rebajar (€) <span class="required">*</span></label>
+                                <input type="number" placeholder="Ej. 1200.00" required>
+                            </div>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>Motivo o Justificación <span class="required">*</span></label>
+                                <textarea rows="3" placeholder="Ej. Descuento por volumen acordado comercialmente..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="notas-credito.html" class="btn-secondary" style="text-decoration: none;">Cancelar</a>
+                        <button type="submit" class="btn-primary" style="background-color: #dc2626;">Emitir Documento</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script src="../../JS/sidebar.js"></script>
+</body>
+</html>

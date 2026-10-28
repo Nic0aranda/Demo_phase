@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operaciones - ERP Empresarial</title>
+    <!-- Referencias a los estilos -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/components.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">N</span>
+                    <div class="logo-text">
+                        <strong>ERP EMPRESARIAL</strong>
+                        <span>Portal de empresa</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar">LM</div>
+                <div class="user-info">
+                    <strong>Laura Martínez</strong>
+                    <span>Administrador</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <p class="menu-label">GENERAL</p>
+                <ul>
+                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
+                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li class="active"><a href="operaciones.html">Operaciones</a></li>
+                    <li><a href="facturacion.html">Facturación</a></li>
+                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
+                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
+                    <li><a href="notas-credito.html">Notas de crédito</a></li>
+                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout">
+                    Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- CABECERA -->
+            <header class="topbar">
+                <div class="header-titles">
+                    <span class="badge">TIPO DE CUENTA: Administrador</span>
+                    <h1>Operaciones</h1>
+                    <p>Gestión documental y estado logístico de tus clientes.</p>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Buscar en el portal...">
+                    </div>
+                </div>
+            </header>
+
+            <!-- ACCIONES DE LA VISTA OPERACIONES -->
+            <div class="view-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="search-bar search-large">
+                    <input type="text" placeholder="Buscar por N° Operación, RUT, Nombre o Fecha..." style="width: 380px;">
+                </div>
+                <a href="crear-operaciones.html" style="text-decoration: none;">
+                    <button class="btn-primary">+ Crear operación</button>
+                </a>
+            </div>
+
+            <!-- TABLA DE OPERACIONES -->
+            <div class="card table-card">
+                <table class="data-table ops-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>CLIENTE</th>
+                            <th>RUT</th>
+                            <th>TIPO</th>
+                            <th>TRANSPORTE</th>
+                            <th>INVOICE</th>
+                            <th>BL/AWB</th>
+                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>OP-001</strong></td>
+                            <td>Import. Andina SpA</td>
+                            <td>76.123.456-7</td>
+                            <td>Importación</td>
+                            <td>Marítima</td>
+                            <td class="icon-cell"><span class="check-icon">☑️</span></td>
+                            <td class="icon-cell"><span class="check-icon">☑️</span></td>
+                            <td><span class="status-badge process">En proceso</span></td>
+                            <td class="actions-cell">
+                                <button class="btn-action doc-btn">Documentos</button>
+                                <button class="btn-action close-btn">Cerrar</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>OP-002</strong></td>
+                            <td>Exportadora Sur</td>
+                            <td>77.234.567-8</td>
+                            <td>Exportación</td>
+                            <td>Aérea</td>
+                            <td class="icon-cell"><span class="check-icon">☑️</span></td>
+                            <td class="icon-cell"><span class="cross-icon">❌</span></td>
+                            <td><span class="status-badge incomplete">Documentación incompleta</span></td>
+                            <td class="actions-cell">
+                                <button class="btn-action doc-btn">Documentos</button>
+                                <button class="btn-action close-btn">Cerrar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE DOCUMENTOS (Oculto por defecto) -->
+            <div id="docsModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Cargar Documentos</h2>
+                        <button class="close-modal" id="closeModalBtn">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <p class="modal-subtitle">Operación seleccionada. Adjunta los archivos necesarios (Factura, B/L, etc.).</p>
+                        
+                        <!-- Zona de arrastrar y soltar mockeada -->
+                        <div class="upload-zone">
+                            <span class="upload-icon">📤</span>
+                            <p>Arrastra y suelta tus archivos aquí o <strong>haz clic para buscar</strong></p>
+                            <span class="upload-hint">Formatos soportados: PDF, JPG, PNG (Max. 10MB)</span>
+                        </div>
+
+                        <!-- Lista de requerimientos de documentos -->
+                        <div class="docs-list">
+                            <h4>Estado de la Documentación</h4>
+                            <ul>
+                                <li>
+                                    <div class="doc-info">
+                                        <span class="doc-icon">📄</span>
+                                        <span>Invoice (Factura Comercial)</span>
+                                    </div>
+                                    <span class="doc-status pending">Falta archivo</span>
+                                </li>
+                                <li>
+                                    <div class="doc-info">
+                                        <span class="doc-icon">🚢</span>
+                                        <span>BL / AWB (Transporte)</span>
+                                    </div>
+                                    <span class="doc-status uploaded">Cargado</span>
+                                </li>
+                                <li>
+                                    <div class="doc-info">
+                                        <span class="doc-icon">📜</span>
+                                        <span>Certificados adicionales</span>
+                                    </div>
+                                    <span class="doc-status optional">Opcional</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-secondary" id="cancelModalBtn">Cancelar</button>
+                        <button class="btn-primary">Guardar Documentos</button>
+                    </div>
+                </div>
+            </div>
+    <script src="../../JS/operaciones.js"></script>
+    <script src="../../JS/sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuentas por Cobrar - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">N</span>
+                    <div class="logo-text">
+                        <strong>ERP EMPRESARIAL</strong>
+                        <span>Portal de empresa</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar">LM</div>
+                <div class="user-info">
+                    <strong>Laura Martínez</strong>
+                    <span>Administrador</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <p class="menu-label">GENERAL</p>
+                <ul>
+                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
+                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li><a href="operaciones.html">Operaciones</a></li>
+                    <li><a href="facturacion.html">Facturación</a></li>
+                    <li class="active"><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
+                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
+                    <li><a href="notas-credito.html">Notas de crédito</a></li>
+                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout">
+                    Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-titles">
+                    <span class="badge">ÁREA FINANCIERA</span>
+                    <h1>Cuentas por Cobrar</h1>
+                    <p>Gestión de cartera, seguimiento de deuda y antigüedades de saldo.</p>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="btn-secondary">⬇️ Reporte de Antigüedad</button>
+                    <button class="btn-primary">✉️ Enviar Recordatorios</button>
+                </div>
+            </header>
+
+            <!-- KPIs DE CUENTAS POR COBRAR -->
+            <div class="kpi-cards" style="margin-bottom: 25px;">
+                <div class="card kpi-card">
+                    <h3>Total por Cobrar</h3>
+                    <div class="kpi-value">€ 38.200</div>
+                    <p class="trend neutral">Cartera total vigente</p>
+                </div>
+                <div class="card kpi-card">
+                    <h3>Vencido (>30 días)</h3>
+                    <div class="kpi-value" style="color: #dc2626;">€ 12.400</div>
+                    <p class="trend error">32% de la cartera total</p>
+                </div>
+                <div class="card kpi-card">
+                    <h3>Próximos a Vencer</h3>
+                    <div class="kpi-value" style="color: #d97706;">€ 5.800</div>
+                    <p class="trend">Vencen en los próximos 7 días</p>
+                </div>
+            </div>
+
+            <!-- TABLA DE DEUDAS -->
+            <div class="card table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>CLIENTE</th>
+                            <th>N° FACTURA</th>
+                            <th>FECHA VENC.</th>
+                            <th>MONTO PENDIENTE</th>
+                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Constructora Andes</strong></td>
+                            <td>FAC-2026-1045</td>
+                            <td>18 Oct 2026</td>
+                            <td><strong>€ 5.800,00</strong></td>
+                            <td><span class="status-badge active">Al día</span></td>
+                            <td>
+                                <button class="btn-action">Registrar Pago</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Import. Andina SpA</strong></td>
+                            <td>FAC-2026-1042</td>
+                            <td>31 Oct 2026</td>
+                            <td><strong>€ 12.500,00</strong></td>
+                            <td><span class="status-badge active">Al día</span></td>
+                            <td>
+                                <button class="btn-action">Registrar Pago</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Exportadora Sur</strong></td>
+                            <td>FAC-2026-1038</td>
+                            <td>15 Sep 2026</td>
+                            <td style="color: #dc2626;"><strong>€ 4.120,00</strong></td>
+                            <td><span class="status-badge error">Atrasado (29 días)</span></td>
+                            <td>
+                                <a href="gestion-cobranza.html" class="btn-action" style="color: #d97706;">Gestionar</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Servicios Norte</strong></td>
+                            <td>FAC-2026-1030</td>
+                            <td>01 Ago 2026</td>
+                            <td style="color: #dc2626;"><strong>€ 8.280,00</strong></td>
+                            <td><span class="status-badge error">Crítico (>60 días)</span></td>
+                            <td>
+                                <a href="gestion-cobranza.html" class="btn-action" style="color: #dc2626;">Aviso Legal</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script src="../../js/sidebar.js"></script>
+</body>
+</html>

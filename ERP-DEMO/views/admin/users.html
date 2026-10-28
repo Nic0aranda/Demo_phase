@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+    <link rel="stylesheet" href="../../CSS/forms.css">
+    <style>
+        .permiso-extra {
+            background-color: var(--light-purple);
+            color: var(--primary-purple);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        /* Estilo para los checkboxes del modal */
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            accent-color: var(--primary-purple);
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">N</span>
+                    <div class="logo-text">
+                        <strong>ERP EMPRESARIAL</strong>
+                        <span>Portal de empresa</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar">LM</div>
+                <div class="user-info">
+                    <strong>Laura Martínez</strong>
+                    <span>Administrador</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <p class="menu-label">GENERAL</p>
+                <ul>
+                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
+                    <li><a href="dashboard.html">Panel principal</a></li>
+                    <li><a href="../compartidas/clientes.html">Clientes</a></li>
+                    <li><a href="../compartidas/operaciones.html">Operaciones</a></li>
+                    <li><a href="../compartidas/facturacion.html">Facturación</a></li>
+                    <li><a href="../compartidas/cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
+                    <li><a href="../compartidas/conciliacion-bancaria.html">Conciliación bancaria</a></li>
+                    <li><a href="../compartidas/notas-credito.html">Notas de crédito</a></li>
+                    <li class="active"><a href="users.html">Gestión de usuarios</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout">
+                    Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- CABECERA -->
+            <header class="topbar">
+                <div class="header-titles">
+                    <span class="badge">ADMINISTRACIÓN</span>
+                    <h1>Gestión de Usuarios</h1>
+                    <p>Administra accesos, roles y permisos temporales de tu equipo de trabajo.</p>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <span>🔍</span>
+                        <input type="text" placeholder="Buscar empleado...">
+                    </div>
+                    <!-- Botón para crear un nuevo usuario dirigiendo a crear-usuario.html -->
+                    <a href="crear-usuario.html" style="text-decoration: none;">
+                        <button class="btn-primary">+ Crear usuario</button>
+                    </a>
+                </div>
+            </header>
+
+            <!-- TABLA DE USUARIOS -->
+            <div class="card table-card" style="margin-top: 20px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>USUARIO</th>
+                            <th>CORREO CORPORATIVO</th>
+                            <th>ROL PRINCIPAL</th>
+                            <th>ESTADO</th>
+                            <th>ÚLTIMO ACCESO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Laura Martínez</strong></td>
+                            <td>laura.martinez@empresa.com</td>
+                            <td>Administrador Global</td>
+                            <td><span class="status-badge active">Activo</span></td>
+                            <td>Hace 10 min</td>
+                            <td>
+                                <button class="btn-action btn-editar-permisos" data-user="Laura Martínez" data-role="admin">⚙️ Editar Permisos</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diego Sánchez</strong></td>
+                            <td>diego.sanchez@empresa.com</td>
+                            <td>
+                                Área Comercial<br>
+                                <span class="permiso-extra">+ Aprobar cotizaciones</span>
+                            </td>
+                            <td><span class="status-badge active">Activo</span></td>
+                            <td>Ayer 18:30</td>
+                            <td>
+                                <button class="btn-action btn-editar-permisos" data-user="Diego Sánchez" data-role="comercial">⚙️ Editar Permisos</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ana Torres</strong></td>
+                            <td>ana.torres@empresa.com</td>
+                            <td>
+                                Área Operativa<br>
+                                <span class="permiso-extra">+ Soporte Contabilidad (Cobertura)</span>
+                            </td>
+                            <td><span class="status-badge active">Activo</span></td>
+                            <td>Hoy 08:15</td>
+                            <td>
+                                <button class="btn-action btn-editar-permisos" data-user="Ana Torres" data-role="operativa">⚙️ Editar Permisos</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Carlos Vega</strong></td>
+                            <td>carlos.vega@empresa.com</td>
+                            <td>Contabilidad</td>
+                            <td><span class="status-badge inactive">De Vacaciones</span></td>
+                            <td>Hace 5 días</td>
+                            <td>
+                                <button class="btn-action btn-editar-permisos" data-user="Carlos Vega" data-role="contabilidad">⚙️ Editar Permisos</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- MODAL DE EDICIÓN DE PERMISOS -->
+            <div id="permisosModal" class="modal-overlay">
+                <div class="modal-content" style="width: 450px;">
+                    <div class="modal-header">
+                        <h2>Editar Permisos</h2>
+                        <button class="close-modal" id="closePermisosBtn">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <p class="modal-subtitle" style="margin-bottom: 25px;">Modificando accesos para: <strong id="modalUserName" style="color: var(--text-main);">Usuario</strong></p>
+                        
+                        <div class="form-group">
+                            <label>Rol Principal del Sistema</label>
+                            <select id="modalMainRole" style="width: 100%;">
+                                <option value="admin">Administrador Global</option>
+                                <option value="comercial">Área Comercial</option>
+                                <option value="operativa">Área Operativa</option>
+                                <option value="contabilidad">Contabilidad y Finanzas</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                            <label>Permisos Adicionales (Coberturas Temporales)</label>
+                            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Otorga acceso a módulos extra sin cambiar el rol principal. Ideal para reemplazos por vacaciones.</p>
+                            
+                            <div class="checkbox-group">
+                                <label><input type="checkbox"> Acceso a módulo de Facturación</label>
+                                <label><input type="checkbox"> Aprobar cotizaciones y descuentos</label>
+                                <label><input type="checkbox"> Cerrar operaciones y B/L</label>
+                                <label><input type="checkbox"> Acceso a Conciliación Bancaria</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Estado de la cuenta</label>
+                            <select style="width: 100%;">
+                                <option value="activo">Activo</option>
+                                <option value="vacaciones">De Vacaciones (Suspender temporalmente)</option>
+                                <option value="inactivo">Inactivo / Bloqueado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-secondary" id="cancelPermisosBtn">Cancelar</button>
+                        <button class="btn-primary">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="../../js/sidebar.js"></script>
+    <script>
+        // --- LÓGICA DEL MODAL DE PERMISOS ---
+        const permisosModal = document.getElementById('permisosModal');
+        const editarBtns = document.querySelectorAll('.btn-editar-permisos');
+        const closeBtn = document.getElementById('closePermisosBtn');
+        const cancelBtn = document.getElementById('cancelPermisosBtn');
+        const modalUserName = document.getElementById('modalUserName');
+        const modalMainRole = document.getElementById('modalMainRole');
+
+        // Abrir modal y cargar datos del usuario
+        editarBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userName = this.getAttribute('data-user');
+                const userRole = this.getAttribute('data-role');
+                
+                modalUserName.textContent = userName;
+                modalMainRole.value = userRole;
+
+                permisosModal.classList.add('active');
+            });
+        });
+
+        // Función para cerrar modal
+        const closeModal = () => {
+            permisosModal.classList.remove('active');
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        // Cerrar al hacer clic fuera del modal
+        window.addEventListener('click', (e) => {
+            if (e.target === permisosModal) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Operación - ERP Empresarial</title>
+    <!-- Referencias a los estilos en la carpeta CSS (respetando mayúsculas) -->
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+    <link rel="stylesheet" href="../../CSS/forms.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">N</span>
+                    <div class="logo-text">
+                        <strong>ERP EMPRESARIAL</strong>
+                        <span>Portal de empresa</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar">LM</div>
+                <div class="user-info">
+                    <strong>Laura Martínez</strong>
+                    <span>Administrador</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <p class="menu-label">GENERAL</p>
+                <ul>
+                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
+                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li class="active"><a href="operaciones.html">Operaciones</a></li>
+                    <li><a href="facturacion.html">Facturación</a></li>
+                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
+                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
+                    <li><a href="notas-credito.html">Notas de crédito</a></li>
+                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout">
+                    Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- CABECERA -->
+            <header class="topbar">
+                <div class="header-titles">
+                    <div class="breadcrumb">
+                        <!-- Ruta hacia la lista de operaciones en la misma carpeta compartidas -->
+                        <a href="operaciones.html">Operaciones</a> <span class="separator">/</span> <strong>Crear operación</strong>
+                    </div>
+                    <h1>Crear operación</h1>
+                    <p>Registra un nuevo proceso logístico y asócialo a un cliente.</p>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Buscar en el portal...">
+                    </div>
+                </div>
+            </header>
+
+            <!-- FORMULARIO CREAR OPERACIÓN -->
+            <div class="card form-card">
+                <div class="form-card-header">
+                    <p>Define los parámetros iniciales del embarque. Los campos marcados con <span class="required">*</span> son obligatorios.</p>
+                </div>
+
+                <form action="operaciones.html" method="GET">
+                    
+                    <!-- Sección: Asignación de Cliente -->
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Asignación de cliente</h3>
+                            <p>Selecciona la empresa titular de esta operación.</p>
+                            <p class="note">Puedes buscar escribiendo el Nombre o el RUT del cliente.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <div class="form-group">
+                                <label for="cliente">Buscar cliente <span class="required">*</span></label>
+                                <input type="text" id="cliente" list="clientesList" placeholder="Ej. 76.123.456-7 o Norte Sur S.A." required autocomplete="off">
+                                
+                                <datalist id="clientesList">
+                                    <option value="Norte Sur S.A. | 76.234.567-8"></option>
+                                    <option value="Constructora Andes | 77.891.204-5"></option>
+                                    <option value="Distribuidora del Sur | 74.112.330-9"></option>
+                                    <option value="Import. Andina SpA | 76.123.456-7"></option>
+                                    <option value="Exportadora Sur | 77.234.567-8"></option>
+                                </datalist>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Detalles Logísticos -->
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Detalles logísticos</h3>
+                            <p>Especifica la naturaleza del movimiento y el medio de transporte.</p>
+                        </div>
+                        <div class="form-section-fields grid-2-cols">
+                            <div class="form-group">
+                                <label for="tipoOperacion">Tipo de operación <span class="required">*</span></label>
+                                <select id="tipoOperacion" required>
+                                    <option value="" disabled selected>Seleccionar tipo</option>
+                                    <option value="importacion">Importación</option>
+                                    <option value="exportacion">Exportación</option>
+                                    <option value="nacional">Tránsito Nacional</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="viaTransporte">Vía de transporte <span class="required">*</span></label>
+                                <select id="viaTransporte" required>
+                                    <option value="" disabled selected>Seleccionar vía</option>
+                                    <option value="maritima">Marítima</option>
+                                    <option value="aerea">Aérea</option>
+                                    <option value="terrestre">Terrestre</option>
+                                    <option value="multimodal">Multimodal</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Información Adicional -->
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Información adicional</h3>
+                            <p>Datos complementarios y referencias internas.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <div class="form-group">
+                                <label for="referencia">N° de Referencia o Booking (Opcional)</label>
+                                <input type="text" id="referencia" placeholder="Ej. BK-2023948">
+                            </div>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label for="observaciones">Observaciones</label>
+                                <textarea id="observaciones" rows="3" placeholder="Instrucciones especiales, consideraciones de carga..." maxlength="500"></textarea>
+                                <span class="char-count">Máximo 500 caracteres</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones del Formulario -->
+                    <div class="form-actions">
+                        <a href="operaciones.html" class="btn-secondary" style="text-decoration: none;">Cancelar</a>
+                        <button type="submit" class="btn-primary">✓ Crear operación</button>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+    </div>
+    <script src="../../JS/sidebar.js"></script>
+</body>
+</html>
