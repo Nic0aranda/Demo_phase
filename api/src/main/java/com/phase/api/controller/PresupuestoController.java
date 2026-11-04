@@ -2,14 +2,27 @@ package com.phase.api.controller;
 
 import com.phase.api.dto.PresupuestoDTO;
 import com.phase.api.service.PresupuestoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/presupuestos")
+@Tag(name = "Presupuestos", description = "Creacion y gestion de presupuestos")
+@SecurityRequirement(name = "bearerAuth")
 public class PresupuestoController {
 
     private final PresupuestoService presupuestoService;
@@ -19,56 +32,39 @@ public class PresupuestoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','COMERCIAL')")
     public ResponseEntity<PresupuestoDTO> crearPresupuesto(@Valid @RequestBody PresupuestoDTO presupuesto) {
-        try {
-            PresupuestoDTO creado = presupuestoService.crearPresupuesto(presupuesto);
-            return ResponseEntity.ok(creado);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        PresupuestoDTO creado = presupuestoService.crearPresupuesto(presupuesto);
+        return ResponseEntity.created(URI.create("/api/v1/presupuestos/" + creado.getId())).body(creado);
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<PresupuestoDTO>> listarPresupuestos() {
-        try {
-            return ResponseEntity.ok(presupuestoService.listarTodos());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok(presupuestoService.listarTodos());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PresupuestoDTO> obtenerPresupuesto(@PathVariable String id) {
-        try {
-            PresupuestoDTO presupuesto = presupuestoService.obtenerPorId(id);
-            if (presupuesto == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(presupuesto);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(presupuestoService.obtenerPorId(id));
     }
 
-    // PATCH se usa en REST para actualizaciones parciales (solo cambiamos el estado)
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','COMERCIAL')")
+    public ResponseEntity<PresupuestoDTO> actualizar(@PathVariable String id,
+                                                     @Valid @RequestBody PresupuestoDTO presupuesto) {
+        return ResponseEntity.ok(presupuestoService.actualizar(id, presupuesto));
+    }
+
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<String> actualizarEstado(@PathVariable String id, @RequestBody Map<String, String> body) {
-        try {
-            String nuevoEstado = body.get("estado");
-            if (nuevoEstado == null || nuevoEstado.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("{\"error\": \"Debe enviar el campo 'estado'\"}");
-            }
-            
-            presupuestoService.actualizarEstado(id, nuevoEstado.toUpperCase());
-            return ResponseEntity.ok("{\"mensaje\": \"Estado actualizado a " + nuevoEstado.toUpperCase() + "\"}");
-            
-        } catch (RuntimeException e) {
-            if ("PRESUPUESTO_NO_ENCONTRADO".equals(e.getMessage())) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.internalServerError().body("{\"error\": \"" + e.getMessage() + "\"}");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("{\"error\": \"" + e.getMessage() + "\"}");
-        }
+    @PreAuthorize("hasAnyRole('ADMIN','COMERCIAL')")
+    public ResponseEntity<Void> actualizarEstado(@PathVariable String id,
+                                                 @RequestBody EstadoRequest request) {
+        presupuestoService.actualizarEstado(id, request.estado());
+        return ResponseEntity.noContent().build();
+    }
+
+    public record EstadoRequest(String estado) {
     }
 }

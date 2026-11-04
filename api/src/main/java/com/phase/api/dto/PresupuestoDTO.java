@@ -1,68 +1,142 @@
 package com.phase.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+
+import java.math.BigDecimal;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PresupuestoDTO {
 
-    private String id; // Ej: PRE-1001
+    private String id;
 
     @NotBlank(message = "El RUT del cliente es obligatorio")
     private String rutCliente;
 
     private String fechaEmision;
-    
-    @NotEmpty(message = "El presupuesto debe tener al menos un ítem")
+
+    @NotEmpty(message = "El presupuesto debe tener al menos un item")
+    @Valid
     private List<ItemPresupuestoDTO> items;
 
-    // Estos valores los recalculará el backend, pero los declaramos para el JSON
-    private double subtotal;
-    private double impuestos; // 19% IVA
-    private double total;
-    
-    private String estado = "BORRADOR"; // BORRADOR, ENVIADO, APROBADO, RECHAZADO
+    private BigDecimal subtotal = BigDecimal.ZERO;
+    private BigDecimal impuestos = BigDecimal.ZERO;
+    private BigDecimal total = BigDecimal.ZERO;
 
-    // Getters y Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getRutCliente() { return rutCliente; }
-    public void setRutCliente(String rutCliente) { this.rutCliente = rutCliente; }
-    public String getFechaEmision() { return fechaEmision; }
-    public void setFechaEmision(String fechaEmision) { this.fechaEmision = fechaEmision; }
-    public List<ItemPresupuestoDTO> getItems() { return items; }
-    public void setItems(List<ItemPresupuestoDTO> items) { this.items = items; }
-    public double getSubtotal() { return subtotal; }
-    public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
-    public double getImpuestos() { return impuestos; }
-    public void setImpuestos(double impuestos) { this.impuestos = impuestos; }
-    public double getTotal() { return total; }
-    public void setTotal(double total) { this.total = total; }
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    private String estado = "BORRADOR";
 
-    // Clase interna para las líneas del presupuesto
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRutCliente() {
+        return rutCliente;
+    }
+
+    public void setRutCliente(String rutCliente) {
+        this.rutCliente = rutCliente;
+    }
+
+    public String getFechaEmision() {
+        return fechaEmision;
+    }
+
+    public void setFechaEmision(String fechaEmision) {
+        this.fechaEmision = fechaEmision;
+    }
+
+    public List<ItemPresupuestoDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<ItemPresupuestoDTO> items) {
+        this.items = items;
+    }
+
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public BigDecimal getImpuestos() {
+        return impuestos;
+    }
+
+    public void setImpuestos(BigDecimal impuestos) {
+        this.impuestos = impuestos;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
     public static class ItemPresupuestoDTO {
-        @NotBlank(message = "La descripción no puede estar vacía")
+
+        @NotBlank(message = "La descripcion no puede estar vacia")
         private String descripcion;
 
-        @Min(value = 1, message = "La cantidad mínima es 1")
+        @Min(value = 1, message = "La cantidad minima es 1")
         private int cantidad;
 
-        @Min(value = 0, message = "El precio no puede ser negativo")
-        private double precioUnitario;
+        @DecimalMin(value = "0.00", message = "El precio no puede ser negativo")
+        private BigDecimal precioUnitario = BigDecimal.ZERO;
 
-        private double totalLinea; // Recalculado por backend
+        private BigDecimal totalLinea = BigDecimal.ZERO;
 
-        // Getters y Setters
-        public String getDescripcion() { return descripcion; }
-        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-        public int getCantidad() { return cantidad; }
-        public void setCantidad(int cantidad) { this.cantidad = cantidad; }
-        public double getPrecioUnitario() { return precioUnitario; }
-        public void setPrecioUnitario(double precioUnitario) { this.precioUnitario = precioUnitario; }
-        public double getTotalLinea() { return totalLinea; }
-        public void setTotalLinea(double totalLinea) { this.totalLinea = totalLinea; }
+        public String getDescripcion() {
+            return descripcion;
+        }
+
+        public void setDescripcion(String descripcion) {
+            this.descripcion = descripcion;
+        }
+
+        public int getCantidad() {
+            return cantidad;
+        }
+
+        public void setCantidad(int cantidad) {
+            this.cantidad = cantidad;
+        }
+
+        public BigDecimal getPrecioUnitario() {
+            return precioUnitario;
+        }
+
+        public void setPrecioUnitario(BigDecimal precioUnitario) {
+            this.precioUnitario = precioUnitario;
+        }
+
+        public BigDecimal getTotalLinea() {
+            return totalLinea;
+        }
+
+        public void setTotalLinea(BigDecimal totalLinea) {
+            this.totalLinea = totalLinea;
+        }
     }
 }

@@ -2,14 +2,27 @@ package com.phase.api.controller;
 
 import com.phase.api.dto.OperacionDTO;
 import com.phase.api.service.OperacionService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/operaciones")
+@Tag(name = "Operaciones", description = "Gestion de operaciones de transporte")
+@SecurityRequirement(name = "bearerAuth")
 public class OperacionController {
 
     private final OperacionService operacionService;
@@ -19,54 +32,47 @@ public class OperacionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERACIONES')")
     public ResponseEntity<OperacionDTO> crearOperacion(@Valid @RequestBody OperacionDTO operacion) {
-        try {
-            OperacionDTO creada = operacionService.crearOperacion(operacion);
-            return ResponseEntity.ok(creada);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        OperacionDTO creada = operacionService.crearOperacion(operacion);
+        return ResponseEntity.created(URI.create("/api/v1/operaciones/" + creada.getId())).body(creada);
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<OperacionDTO>> listarOperaciones() {
-        try {
-            return ResponseEntity.ok(operacionService.listarTodas());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok(operacionService.listarTodas());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OperacionDTO> obtenerOperacion(@PathVariable String id) {
-        try {
-            OperacionDTO operacion = operacionService.obtenerPorId(id);
-            if (operacion == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(operacion);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(operacionService.obtenerPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERACIONES')")
+    public ResponseEntity<OperacionDTO> actualizar(@PathVariable String id,
+                                                   @Valid @RequestBody OperacionDTO operacion) {
+        return ResponseEntity.ok(operacionService.actualizar(id, operacion));
     }
 
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<String> actualizarEstado(@PathVariable String id, @RequestBody Map<String, String> body) {
-        try {
-            String nuevoEstado = body.get("estado");
-            if (nuevoEstado == null || nuevoEstado.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("{\"error\": \"Debe enviar el campo 'estado'\"}");
-            }
-            
-            operacionService.actualizarEstado(id, nuevoEstado.toUpperCase());
-            return ResponseEntity.ok("{\"mensaje\": \"Estado de operación actualizado a " + nuevoEstado.toUpperCase() + "\"}");
-        } catch (RuntimeException e) {
-            if ("OPERACION_NO_ENCONTRADA".equals(e.getMessage())) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.internalServerError().body("{\"error\": \"" + e.getMessage() + "\"}");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("{\"error\": \"" + e.getMessage() + "\"}");
-        }
+    @PreAuthorize("hasAnyRole('ADMIN','OPERACIONES')")
+    public ResponseEntity<Void> actualizarEstado(@PathVariable String id,
+                                                 @RequestBody EstadoRequest request) {
+        operacionService.actualizarEstado(id, request.estado());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/documentos")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERACIONES')")
+    public ResponseEntity<OperacionDTO> agregarDocumento(
+            @PathVariable String id,
+            @Valid @RequestBody OperacionDTO.DocumentoOperacionDTO documento) {
+        return ResponseEntity.ok(operacionService.agregarDocumento(id, documento));
+    }
+
+    public record EstadoRequest(String estado) {
     }
 }

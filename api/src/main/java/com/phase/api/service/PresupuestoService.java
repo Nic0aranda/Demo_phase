@@ -1,151 +1,126 @@
 package com.phase.api.service;
 
-import com.phase.api.config.PhaseDbClient;
+import tools.jackson.databind.ObjectMapper;
+import com.phase.api.common.ApiException;
+import com.phase.api.common.SequenceService;
+import com.phase.api.config.FinanceProperties;
 import com.phase.api.dto.PresupuestoDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.phase.api.phase.PhaseClient;
+import com.phase.api.phase.PhaseJson;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class PresupuestoService {
 
-    private final PhaseDbClient phaseDbClient;
-    private final ObjectMapper objectMapper;
+    public static final String GLOBAL = "PRESUPUESTOS";
+    private static final Set<String> ESTADOS = Set.of("BORRADOR", "ENVIADO", "APROBADO", "RECHAZADO");
 
-    public PresupuestoService(PhaseDbClient phaseDbClient) {
-        this.phaseDbClient = phaseDbClient;
-        this.objectMapper = new ObjectMapper();
+    private final PhaseClient phaseClient;
+    private final ObjectMapper objectMapper;
+    private final FinanceProperties financeProperties;
+    private final SequenceService sequenceService;
+
+    public PresupuestoService(PhaseClient phaseClient,
+                              ObjectMapper objectMapper,
+                              FinanceProperties financeProperties,
+                              SequenceService sequenceService) {
+        this.phaseClient = phaseClient;
+        this.objectMapper = objectMapper;
+        this.financeProperties = financeProperties;
+        this.sequenceService = sequenceService;
     }
 
-    public PresupuestoDTO crearPresupuesto(PresupuestoDTO presupuesto) throws Exception {
-        // 1. Generar ID si no viene (Ej: PRE-5f3a...)
-        if (presupuesto.getId() == null || presupuesto.getId().isEmpty()) {
-            presupuesto.setId("PRE-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+    public PresupuestoDTO crearPresupuesto(PresupuestoDTO presupuesto) {
+        if (presupuesto.getId() == null || presupuesto.getId().isBlank()) {
+            presupuesto.setId(sequenceService.nextId("PRE"));
         }
-
-        // 2. Recalcular valores financieros (Lógica de ERP)
-        double subtotal = 0;
-        for (PresupuestoDTO.ItemPresupuestoDTO item : presupuesto.getItems()) {
-            double totalLinea = item.getCantidad() * item.getPrecioUnitario();
-            item.setTotalLinea(totalLinea);
-            subtotal += totalLinea;
-        }
-        
-        presupuesto.setSubtotal(subtotal);
-        presupuesto.setImpuestos(subtotal * 0.19); // Aplicar IVA 19%
-        presupuesto.setTotal(subtotal + presupuesto.getImpuestos());
-
-        // 3. Guardar en PhaseDB
-        String jsonPayload = objectMapper.writeValueAsString(presupuesto);
-        String comando = String.format("ZMERGE ^PRESUPUESTOS(\"%s\")=%s", presupuesto.getId(), jsonPayload);
-        phaseDbClient.ejecutarComando(comando);
-
+        preparar(presupuesto);
+        guardar(presupuesto);
         return presupuesto;
     }
 
-    // OBTENER TODOS
+    public PresupuestoDTO actualizar(String id, PresupuestoDTO presupuesto) {
+        if (!phaseClient.exists(GLOBAL, id)) {
+            throw ApiException.notFound("Presupuesto no encontrado: " + id);
+        }
+        presupuesto.setId(id);
+        preparar(presupuesto);
+        guardar(presupuesto);
+        return presupuesto;
+    }
+
     public List<PresupuestoDTO> listarTodos() {
-        List<PresupuestoDTO> presupuestos = new ArrayList<>();
-        try {
-            String comando = "ZWRITE ^PRESUPUESTOS";
-            String respuesta = phaseDbClient.ejecutarComando(comando);
-            
-            if (respuesta == null || respuesta.trim().isEmpty() || respuesta.equals("null")) {
-                return presupuestos;
-            }
-
-            com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(respuesta);
-            if (rootNode.isObject()) {
-                rootNode.fields().forEachRemaining(entry -> {
-                    com.fasterxml.jackson.databind.JsonNode presNode = entry.getValue();
-                    if (presNode.isObject() && presNode.has("id")) {
-                        presupuestos.add(parsearPresupuesto(presNode));
-                    }
-                });
-            }
-        } catch (Exception e) {
-            System.err.println("Error en listarTodos: " + e.getMessage());
-        }
-        return presupuestos;
+        String json = phaseClient.readAll(GLOBAL);
+        Map<String, PresupuestoDTO> presupuestos = PhaseJson.toMap(json, PresupuestoDTO.class, objectMapper);
+        return new ArrayList<>(presupuestos.values());
     }
 
-    // OBTENER POR ID
     public PresupuestoDTO obtenerPorId(String id) {
-        String idLimpio = id.replace("\"", "").trim();
-        
-        try {
-            String comando = String.format("ZWRITE ^PRESUPUESTOS(\"%s\")", idLimpio);
-            String respuesta = phaseDbClient.ejecutarComando(comando);
-            
-            if (respuesta == null || respuesta.trim().isEmpty() || respuesta.equals("null")) {
-                return null;
-            }
-
-            com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(respuesta);
-            
-            // Caso 1: Si PhaseDB lo devuelve envuelto (Ej: {"PRE-6A22A6DC": { ... }})
-            if (rootNode.has(idLimpio)) {
-                return parsearPresupuesto(rootNode.get(idLimpio));
-            } 
-            // Caso 2: Si PhaseDB devuelve el objeto directamente (Ej: {"id": "PRE-6A22A6DC", ...})
-            else if (rootNode.has("id")) {
-                return parsearPresupuesto(rootNode);
-            }
-            
-            return null; // Si no tiene el formato esperado, devolvemos null (404)
-        } catch (Exception e) {
-            System.err.println("Error en obtenerPorId: " + e.getMessage());
-            return null;
+        String json = phaseClient.read(GLOBAL, id);
+        PresupuestoDTO presupuesto = PhaseJson.toObject(json, PresupuestoDTO.class, objectMapper);
+        if (presupuesto == null) {
+            throw ApiException.notFound("Presupuesto no encontrado: " + id);
         }
-    }
-    // MÉTODO AYUDANTE: Transforma el formato de PhaseDB a Java
-    private PresupuestoDTO parsearPresupuesto(com.fasterxml.jackson.databind.JsonNode node) {
-        PresupuestoDTO p = new PresupuestoDTO();
-        p.setId(node.path("id").asText(null));
-        p.setRutCliente(node.path("rutCliente").asText(null));
-        p.setFechaEmision(node.path("fechaEmision").asText(null));
-        p.setSubtotal(node.path("subtotal").asDouble(0));
-        p.setImpuestos(node.path("impuestos").asDouble(0));
-        p.setTotal(node.path("total").asDouble(0));
-        p.setEstado(node.path("estado").asText("BORRADOR"));
-
-        List<PresupuestoDTO.ItemPresupuestoDTO> listaItems = new ArrayList<>();
-        com.fasterxml.jackson.databind.JsonNode itemsNode = node.path("items");
-        
-        // Magia aquí: Si PhaseDB lo devuelve como Objeto {"1":{}, "2":{}}, sacamos solo los valores
-        if (itemsNode.isObject()) {
-            itemsNode.elements().forEachRemaining(itemNode -> {
-                try {
-                    listaItems.add(objectMapper.treeToValue(itemNode, PresupuestoDTO.ItemPresupuestoDTO.class));
-                } catch (Exception e) {}
-            });
-        } 
-        // Por seguridad: Si llega a venir como Arreglo normal [{...}]
-        else if (itemsNode.isArray()) {
-            itemsNode.forEach(itemNode -> {
-                try {
-                    listaItems.add(objectMapper.treeToValue(itemNode, PresupuestoDTO.ItemPresupuestoDTO.class));
-                } catch (Exception e) {}
-            });
-        }
-        
-        p.setItems(listaItems);
-        return p;
+        return presupuesto;
     }
 
-    public void actualizarEstado(String id, String nuevoEstado) throws Exception {
-        // 1. Verificamos que el presupuesto exista usando el método GET que ya corregimos
-        PresupuestoDTO existente = obtenerPorId(id);
-        if (existente == null) {
-            throw new RuntimeException("PRESUPUESTO_NO_ENCONTRADO");
+    public void actualizarEstado(String id, String nuevoEstado) {
+        if (!phaseClient.exists(GLOBAL, id)) {
+            throw ApiException.notFound("Presupuesto no encontrado: " + id);
         }
-
-        // 2. Usamos ZMERGE para inyectar solo la actualización del estado.
-        // Esto actuará como un verdadero PATCH, dejando los ítems, rut y totales intactos.
-        String comando = String.format("ZMERGE ^PRESUPUESTOS(\"%s\")={\"estado\":\"%s\"}", id, nuevoEstado);
-        phaseDbClient.ejecutarComando(comando);
+        String estado = normalizarEstado(nuevoEstado);
+        phaseClient.writePartialJson(GLOBAL, id, "{\"estado\":\"" + estado + "\"}");
     }
 
+    private void preparar(PresupuestoDTO presupuesto) {
+        if (presupuesto.getFechaEmision() == null || presupuesto.getFechaEmision().isBlank()) {
+            presupuesto.setFechaEmision(LocalDate.now().toString());
+        }
+
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (PresupuestoDTO.ItemPresupuestoDTO item : presupuesto.getItems()) {
+            BigDecimal precio = item.getPrecioUnitario() == null ? BigDecimal.ZERO : item.getPrecioUnitario();
+            BigDecimal totalLinea = precio.multiply(BigDecimal.valueOf(item.getCantidad()))
+                    .setScale(2, RoundingMode.HALF_UP);
+            item.setPrecioUnitario(precio.setScale(2, RoundingMode.HALF_UP));
+            item.setTotalLinea(totalLinea);
+            subtotal = subtotal.add(totalLinea);
+        }
+
+        subtotal = subtotal.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal impuestos = subtotal.multiply(financeProperties.getIvaRate())
+                .setScale(2, RoundingMode.HALF_UP);
+        presupuesto.setSubtotal(subtotal);
+        presupuesto.setImpuestos(impuestos);
+        presupuesto.setTotal(subtotal.add(impuestos).setScale(2, RoundingMode.HALF_UP));
+
+        if (presupuesto.getEstado() == null || presupuesto.getEstado().isBlank()) {
+            presupuesto.setEstado("BORRADOR");
+        } else {
+            presupuesto.setEstado(normalizarEstado(presupuesto.getEstado()));
+        }
+    }
+
+    private String normalizarEstado(String estado) {
+        String normalized = estado == null ? "" : estado.trim().toUpperCase(Locale.ROOT);
+        if (!ESTADOS.contains(normalized)) {
+            throw ApiException.badRequest("ESTADO_INVALIDO",
+                    "Estado de presupuesto invalido. Valores permitidos: " + ESTADOS);
+        }
+        return normalized;
+    }
+
+    private void guardar(PresupuestoDTO presupuesto) {
+        String json = PhaseJson.toJson(presupuesto, objectMapper);
+        phaseClient.writeJson(GLOBAL, presupuesto.getId(), json, true);
+    }
 }

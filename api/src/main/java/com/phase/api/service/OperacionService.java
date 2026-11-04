@@ -1,74 +1,122 @@
 package com.phase.api.service;
 
-import com.phase.api.config.PhaseDbClient;
+import tools.jackson.databind.ObjectMapper;
+import com.phase.api.common.ApiException;
+import com.phase.api.common.SequenceService;
 import com.phase.api.dto.OperacionDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.phase.api.phase.PhaseClient;
+import com.phase.api.phase.PhaseJson;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class OperacionService {
 
-    private final PhaseDbClient phaseDbClient;
-    private final ObjectMapper objectMapper;
+    public static final String GLOBAL = "OPERACIONES";
+    private static final Set<String> ESTADOS =
+            Set.of("PLANIFICADA", "EN_CURSO", "FINALIZADA", "CANCELADA", "ATRASADO");
 
-    public OperacionService(PhaseDbClient phaseDbClient) {
-        this.phaseDbClient = phaseDbClient;
-        this.objectMapper = new ObjectMapper();
+    private final PhaseClient phaseClient;
+    private final ObjectMapper objectMapper;
+    private final SequenceService sequenceService;
+
+    public OperacionService(PhaseClient phaseClient,
+                            ObjectMapper objectMapper,
+                            SequenceService sequenceService) {
+        this.phaseClient = phaseClient;
+        this.objectMapper = objectMapper;
+        this.sequenceService = sequenceService;
     }
 
-    public OperacionDTO crearOperacion(OperacionDTO operacion) throws Exception {
-        if (operacion.getId() == null || operacion.getId().isEmpty()) {
-            operacion.setId("OP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+    public OperacionDTO crearOperacion(OperacionDTO operacion) {
+        if (operacion.getId() == null || operacion.getId().isBlank()) {
+            operacion.setId(sequenceService.nextId("OP"));
         }
-        String jsonPayload = objectMapper.writeValueAsString(operacion);
-        String comando = String.format("ZMERGE ^OPERACIONES(\"%s\")=%s", operacion.getId(), jsonPayload);
-        phaseDbClient.ejecutarComando(comando);
+        preparar(operacion);
+        guardar(operacion);
+        return operacion;
+    }
+
+    public OperacionDTO actualizar(String id, OperacionDTO operacion) {
+        if (!phaseClient.exists(GLOBAL, id)) {
+            throw ApiException.notFound("Operacion no encontrada: " + id);
+        }
+        operacion.setId(id);
+        preparar(operacion);
+        guardar(operacion);
         return operacion;
     }
 
     public List<OperacionDTO> listarTodas() {
-        List<OperacionDTO> operaciones = new ArrayList<>();
-        try {
-            String comando = "ZWRITE ^OPERACIONES";
-            String respuesta = phaseDbClient.ejecutarComando(comando);
-            if (respuesta == null || respuesta.trim().isEmpty() || respuesta.equals("null")) return operaciones;
-
-            var rootNode = objectMapper.readTree(respuesta);
-            if (rootNode.isObject()) {
-                rootNode.fields().forEachRemaining(entry -> {
-                    var node = entry.getValue();
-                    if (node.isObject() && node.has("id")) {
-                        try { operaciones.add(objectMapper.treeToValue(node, OperacionDTO.class)); } 
-                        catch (Exception e) {}
-                    }
-                });
-            }
-        } catch (Exception e) { System.err.println("Error listarOperaciones: " + e.getMessage()); }
-        return operaciones;
+        String json = phaseClient.readAll(GLOBAL);
+        Map<String, OperacionDTO> operaciones = PhaseJson.toMap(json, OperacionDTO.class, objectMapper);
+        return new ArrayList<>(operaciones.values());
     }
 
     public OperacionDTO obtenerPorId(String id) {
-        String idLimpio = id.replace("\"", "").trim();
-        try {
-            String comando = String.format("ZWRITE ^OPERACIONES(\"%s\")", idLimpio);
-            String respuesta = phaseDbClient.ejecutarComando(comando);
-            if (respuesta == null || respuesta.trim().isEmpty() || respuesta.equals("null")) return null;
-
-            var rootNode = objectMapper.readTree(respuesta);
-            if (rootNode.has(idLimpio)) return objectMapper.treeToValue(rootNode.get(idLimpio), OperacionDTO.class);
-            else if (rootNode.has("id")) return objectMapper.treeToValue(rootNode, OperacionDTO.class);
-            
-            return null;
-        } catch (Exception e) { return null; }
+        String json = phaseClient.read(GLOBAL, id);
+        OperacionDTO operacion = PhaseJson.toObject(json, OperacionDTO.class, objectMapper);
+        if (operacion == null) {
+            throw ApiException.notFound("Operacion no encontrada: " + id);
+        }
+        return operacion;
     }
 
-    public void actualizarEstado(String id, String nuevoEstado) throws Exception {
-        String idLimpio = id.replace("\"", "").trim();
-        if (obtenerPorId(idLimpio) == null) throw new RuntimeException("OPERACION_NO_ENCONTRADA");
-        String comando = String.format("ZMERGE ^OPERACIONES(\"%s\")={\"estado\":\"%s\"}", idLimpio, nuevoEstado);
-        phaseDbClient.ejecutarComando(comando);
+    public void actualizarEstado(String id, String nuevoEstado) {
+        if (!phaseClient.exists(GLOBAL, id)) {
+            throw ApiException.notFound("Operacion no encontrada: " + id);
+        }
+        String estado = normalizarEstado(nuevoEstado);
+        phaseClient.writePartialJson(GLOBAL, id, "{\"estado\":\"" + estado + "\"}");
+    }
+
+    public OperacionDTO agregarDocumento(String id, OperacionDTO.DocumentoOperacionDTO documento) {
+        OperacionDTO operacion = obtenerPorId(id);
+        if (operacion.getDocumentos() == null) {
+            operacion.setDocumentos(new ArrayList<>());
+        }
+        operacion.getDocumentos().add(documento);
+        guardar(operacion);
+        return operacion;
+    }
+
+    private void preparar(OperacionDTO operacion) {
+        if (operacion.getFechaInicio() == null || operacion.getFechaInicio().isBlank()) {
+            operacion.setFechaInicio(LocalDate.now().toString());
+        }
+        if (operacion.getTipoOperacion() != null) {
+            operacion.setTipoOperacion(operacion.getTipoOperacion().trim().toUpperCase(Locale.ROOT));
+        }
+        if (operacion.getViaTransporte() != null) {
+            operacion.setViaTransporte(operacion.getViaTransporte().trim().toUpperCase(Locale.ROOT));
+        }
+        if (operacion.getDocumentos() == null) {
+            operacion.setDocumentos(new ArrayList<>());
+        }
+        if (operacion.getEstado() == null || operacion.getEstado().isBlank()) {
+            operacion.setEstado("PLANIFICADA");
+        } else {
+            operacion.setEstado(normalizarEstado(operacion.getEstado()));
+        }
+    }
+
+    private String normalizarEstado(String estado) {
+        String normalized = estado == null ? "" : estado.trim().toUpperCase(Locale.ROOT);
+        if (!ESTADOS.contains(normalized)) {
+            throw ApiException.badRequest("ESTADO_INVALIDO",
+                    "Estado de operacion invalido. Valores permitidos: " + ESTADOS);
+        }
+        return normalized;
+    }
+
+    private void guardar(OperacionDTO operacion) {
+        String json = PhaseJson.toJson(operacion, objectMapper);
+        phaseClient.writeJson(GLOBAL, operacion.getId(), json, true);
     }
 }
