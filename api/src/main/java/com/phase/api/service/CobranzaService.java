@@ -179,13 +179,6 @@ public class CobranzaService {
     }
 
     private LocalDate parseFecha(String value) {
-        if (value == null || value.isBlank()) {
-            return LocalDate.now();
-        }
-        try {
-            return LocalDate.parse(value.trim());
-        } catch (Exception e) {
-            throw ApiException.badRequest("FECHA_INVALIDA", "La fecha debe tener formato YYYY-MM-DD");
-        }
+        return com.phase.api.common.FechaUtil.opcional(value, "fechaPromesa", LocalDate.now());
     }
 }

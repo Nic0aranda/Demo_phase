@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel principal - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+</head>
+<body data-page="dashboard">
+
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-titles">
+                    <span class="badge" id="dashboard-badge">TIPO DE CUENTA</span>
+                    <h1 id="dashboard-greeting">Panel principal</h1>
+                    <p id="dashboard-subtitle">Cargando indicadores…</p>
+                </div>
+                <div class="header-actions" id="dashboard-actions"></div>
+            </header>
+
+            <section id="dashboard-root" class="dashboard-grid">
+                <div class="card empty-state">
+                    <p>Cargando indicadores…</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../../dist/main.js"></script>
+</body>
+</html>

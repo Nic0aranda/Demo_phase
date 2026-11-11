@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presupuestos - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+</head>
+<body data-page="presupuestos">
+
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-titles">
+                    <span class="badge">TIPO DE CUENTA</span>
+                    <h1>Presupuestos</h1>
+                    <p>Crea propuestas comerciales, envíalas al cliente y apruébalas para ejecutarlas.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="search" id="presupuestoSearch" placeholder="Buscar por número, cliente o RUT…"
+                            aria-label="Buscar presupuestos">
+                    </div>
+                    <select id="presupuestoEstado" class="filter-select" aria-label="Filtrar por estado" style="width:170px;">
+                        <option value="">Todos los estados</option>
+                        <option value="BORRADOR">Borrador</option>
+                        <option value="ENVIADO">Enviado</option>
+                        <option value="APROBADO">Aprobado</option>
+                        <option value="RECHAZADO">Rechazado</option>
+                    </select>
+                    <a href="crear-presupuesto.html" class="btn-primary" data-write-roles="admin,comercial">+ Nuevo presupuesto</a>
+                </div>
+            </header>
+
+            <section id="presupuestosKpis" class="kpi-cards mb-20"></section>
+
+            <section class="card table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>PRESUPUESTO</th>
+                            <th>CLIENTE</th>
+                            <th>EMISIÓN</th>
+                            <th>TOTAL</th>
+                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="presupuestosTableBody">
+                        <tr><td colspan="6" class="table-message">Cargando presupuestos…</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="presupuestoModal" aria-hidden="true">
+        <div class="modal-content modal-large" role="dialog" aria-modal="true" aria-labelledby="presupuestoModalTitle">
+            <div class="modal-header">
+                <h2 id="presupuestoModalTitle">Detalle del presupuesto</h2>
+                <button type="button" class="close-modal" data-close-modal aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body" id="presupuestoModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" data-close-modal>Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../dist/main.js"></script>
+</body>
+</html>

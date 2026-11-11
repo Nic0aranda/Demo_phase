@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.phase.api.usuario.UsuarioEstadoService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +20,11 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UsuarioEstadoService usuarioEstadoService;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, UsuarioEstadoService usuarioEstadoService) {
         this.jwtService = jwtService;
+        this.usuarioEstadoService = usuarioEstadoService;
     }
 
     @Override
@@ -35,17 +38,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtService.parse(token);
                 String email = claims.getSubject();
-                String nombre = claims.get("nombre", String.class);
-                Rol rol = Rol.valueOf(claims.get("rol", String.class));
 
-                @SuppressWarnings("unchecked")
-                List<String> permisos = claims.get("permisos", List.class);
+                if (!usuarioEstadoService.estaActivo(email)) {
+                    SecurityContextHolder.clearContext();
+                    request.setAttribute("jwt.error", "USUARIO_INACTIVO");
+                } else {
+                    String nombre = claims.get("nombre", String.class);
+                    Rol rol = Rol.valueOf(claims.get("rol", String.class));
 
-                AppUserPrincipal principal = new AppUserPrincipal(email, nombre, rol, permisos);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(principal, null, principal.authorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    @SuppressWarnings("unchecked")
+                    List<String> permisos = claims.get("permisos", List.class);
+
+                    AppUserPrincipal principal = new AppUserPrincipal(email, nombre, rol, permisos);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(principal, null, principal.authorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             } catch (Exception ex) {
                 SecurityContextHolder.clearContext();
                 request.setAttribute("jwt.error", ex.getMessage());

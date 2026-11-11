@@ -3,143 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conciliación Bancaria - ERP Empresarial</title>
+    <title>Conciliación bancaria - ERP Empresarial</title>
     <link rel="stylesheet" href="../../CSS/Main.css">
     <link rel="stylesheet" href="../../CSS/layout.css">
     <link rel="stylesheet" href="../../CSS/components.css">
-    <style>
-        .monto-ingreso { color: #1e8e3e; font-weight: bold; }
-        .monto-egreso { color: #d93025; font-weight: bold; }
-    </style>
 </head>
-<body>
+<body data-page="conciliacion">
 
     <div class="app-container">
-        <!-- BARRA LATERAL (SIDEBAR) -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">N</span>
-                    <div class="logo-text">
-                        <strong>ERP EMPRESARIAL</strong>
-                        <span>Portal de empresa</span>
-                    </div>
-                </div>
-            </div>
+        <aside class="sidebar"></aside>
 
-            <div class="user-profile">
-                <div class="avatar">LM</div>
-                <div class="user-info">
-                    <strong>Laura Martínez</strong>
-                    <span>Administrador</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <p class="menu-label">GENERAL</p>
-                <ul>
-                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
-                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
-                    <li><a href="clientes.html">Clientes</a></li>
-                    <li><a href="operaciones.html">Operaciones</a></li>
-                    <li><a href="facturacion.html">Facturación</a></li>
-                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
-                    <li class="active"><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
-                    <li><a href="notas-credito.html">Notas de crédito</a></li>
-                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn-logout">
-                    Cerrar sesión
-                </button>
-            </div>
-        </aside>
-
-        <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content">
             <header class="topbar">
                 <div class="header-titles">
-                    <span class="badge">ÁREA FINANCIERA</span>
-                    <h1>Conciliación Bancaria</h1>
-                    <p>Cruza los movimientos bancarios con los registros contables del sistema.</p>
+                    <span class="badge">TIPO DE CUENTA</span>
+                    <h1>Conciliación bancaria</h1>
+                    <p>Compara los movimientos del banco simulado con los documentos del ERP.</p>
                 </div>
-                
                 <div class="header-actions">
-                    <button class="btn-secondary">⚙️ Reglas Automáticas</button>
-                    <button class="btn-primary">📥 Importar Cartola (CSV)</button>
+                    <button type="button" id="simularConciliacion" class="btn-secondary">Simular movimientos</button>
+                    <button type="button" id="ejecutarConciliacion" class="btn-primary">Conciliar automáticamente</button>
                 </div>
             </header>
 
-            <!-- KPIs DE CONCILIACIÓN -->
-            <div class="kpi-cards" style="margin-bottom: 25px;">
-                <div class="card kpi-card">
-                    <h3>Saldo en Banco</h3>
-                    <div class="kpi-value">€ 145.200</div>
-                    <p class="trend neutral">Actualizado hoy, 08:00 AM</p>
-                </div>
-                <div class="card kpi-card">
-                    <h3>Saldo en ERP</h3>
-                    <div class="kpi-value">€ 140.000</div>
-                    <p class="trend neutral">Suma de cuentas contables</p>
-                </div>
-                <div class="card kpi-card">
-                    <h3>Diferencia por Conciliar</h3>
-                    <div class="kpi-value" style="color: #d97706;">€ 5.200</div>
-                    <p class="trend">12 movimientos pendientes</p>
-                </div>
-            </div>
+            <section id="conciliacionKpis" class="kpi-cards mb-20"></section>
 
-            <!-- TABLA DE MOVIMIENTOS -->
-            <div class="card table-card">
+            <section class="card table-card">
+                <div class="table-card-header">
+                    <div>
+                        <h3>Movimientos bancarios</h3>
+                        <p>Solo administradores y contabilidad pueden simular, ejecutar y conciliar.</p>
+                    </div>
+                </div>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>FECHA BANCARIA</th>
-                            <th>CONCEPTO (BANCO)</th>
+                            <th>FECHA</th>
+                            <th>CONCEPTO</th>
                             <th>MONTO</th>
-                            <th>DOCUMENTO ERP (SUGERIDO)</th>
+                            <th>DOCUMENTO ERP</th>
+                            <th>ORIGEN</th>
                             <th>ESTADO</th>
-                            <th>ACCIÓN</th>
+                            <th>ACCIONES</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>14 Oct 2026</td>
-                            <td>TRF. IMPORT ANDINA SPA</td>
-                            <td class="monto-ingreso">+ € 12.500,00</td>
-                            <td>FAC-2026-1042</td>
-                            <td><span class="status-badge process" style="background:#e6f4ea; color:#1e8e3e;">Conciliado</span></td>
-                            <td>
-                                <span>✅</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>13 Oct 2026</td>
-                            <td>PAGO PROVEEDOR SUR</td>
-                            <td class="monto-egreso">- € 3.200,00</td>
-                            <td><span style="color: var(--text-muted); font-style: italic;">Sin asignar</span></td>
-                            <td><span class="status-badge" style="background:#fef7e0; color:#f29900;">Pendiente</span></td>
-                            <td>
-                                <button class="btn-action" style="color: var(--primary-purple);">Vincular</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>12 Oct 2026</td>
-                            <td>MANTENIMIENTO CUENTA</td>
-                            <td class="monto-egreso">- € 45,00</td>
-                            <td>Gasto Bancario Reg.</td>
-                            <td><span class="status-badge process" style="background:#e6f4ea; color:#1e8e3e;">Conciliado</span></td>
-                            <td>
-                                <span>✅</span>
-                            </td>
-                        </tr>
+                    <tbody id="conciliacionTableBody">
+                        <tr><td colspan="7" class="table-message">Cargando conciliación…</td></tr>
                     </tbody>
                 </table>
-            </div>
+            </section>
         </main>
     </div>
-    <script src="../../js/sidebar.js"></script>
+
+    <script type="module" src="../../dist/main.js"></script>
 </body>
 </html>

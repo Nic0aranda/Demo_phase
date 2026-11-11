@@ -1,6 +1,7 @@
 package com.phase.api.controller;
 
 import com.phase.api.dto.PagoDTO;
+import com.phase.api.service.IdempotenciaService;
 import com.phase.api.service.PagoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,9 +27,11 @@ import java.util.List;
 public class PagoController {
 
     private final PagoService pagoService;
+    private final IdempotenciaService idempotenciaService;
 
-    public PagoController(PagoService pagoService) {
+    public PagoController(PagoService pagoService, IdempotenciaService idempotenciaService) {
         this.pagoService = pagoService;
+        this.idempotenciaService = idempotenciaService;
     }
 
     @GetMapping
@@ -47,14 +51,48 @@ public class PagoController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','CONTABILIDAD')")
-    public ResponseEntity<PagoDTO> registrar(@Valid @RequestBody PagoDTO pago) {
-        PagoDTO registrado = pagoService.registrar(pago);
+    public ResponseEntity<PagoDTO> registrar(
+            @Valid @RequestBody PagoDTO pago,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+        IdempotenciaService.Clave clave = idempotenciaService.resolver(
+                idempotencyKey, "pago", pago.facturaId(), pago.monto(), pago.referencia());
+
+        IdempotenciaService.Resultado<PagoDTO> resultado = idempotenciaService.ejecutar(
+                clave == null ? null : clave.valor(),
+                idempotenciaService.hash(pago),
+                PagoDTO.class,
+                clave == null ? 0 : clave.ttlSegundos(),
+                () -> pagoService.registrar(pago));
+
+        PagoDTO registrado = resultado.valor();
+        if (resultado.replay()) {
+            return ResponseEntity.ok()
+                    .header("Idempotent-Replay", "true")
+                    .body(registrado);
+        }
         return ResponseEntity.created(URI.create("/api/v1/pagos/" + registrado.id())).body(registrado);
     }
 
     @PostMapping("/{id}/anular")
     @PreAuthorize("hasAnyRole('ADMIN','CONTABILIDAD')")
-    public ResponseEntity<PagoDTO> anular(@PathVariable String id) {
-        return ResponseEntity.ok(pagoService.anular(id));
+    public ResponseEntity<PagoDTO> anular(
+            @PathVariable String id,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+        IdempotenciaService.Clave clave = idempotenciaService.resolver(
+                idempotencyKey, "pago-anular", id);
+
+        IdempotenciaService.Resultado<PagoDTO> resultado = idempotenciaService.ejecutar(
+                clave == null ? null : clave.valor(),
+                idempotenciaService.hash("anular|" + id),
+                PagoDTO.class,
+                clave == null ? 0 : clave.ttlSegundos(),
+                () -> pagoService.anular(id));
+
+        if (resultado.replay()) {
+            return ResponseEntity.ok()
+                    .header("Idempotent-Replay", "true")
+                    .body(resultado.valor());
+        }
+        return ResponseEntity.ok(resultado.valor());
     }
 }

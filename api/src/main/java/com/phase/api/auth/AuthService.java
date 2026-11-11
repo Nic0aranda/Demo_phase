@@ -15,24 +15,31 @@ public class AuthService {
     private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LoginRateLimiter loginRateLimiter;
 
     public AuthService(UsuarioService usuarioService,
                        PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       LoginRateLimiter loginRateLimiter) {
         this.usuarioService = usuarioService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.loginRateLimiter = loginRateLimiter;
     }
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, String clientIp) {
+        loginRateLimiter.checkAllowed(request.email(), clientIp);
+
         UsuarioRecord record = usuarioService.obtenerRegistro(request.email());
 
         if (record == null
                 || record.getEstado() != EstadoUsuario.ACTIVO
                 || !passwordEncoder.matches(request.password(), record.getPasswordHash())) {
+            loginRateLimiter.recordFailure(request.email(), clientIp);
             throw ApiException.unauthorized("Correo o contrasena incorrectos");
         }
 
+        loginRateLimiter.recordSuccess(request.email(), clientIp);
         String token = jwtService.generate(record);
         return new LoginResponse(
                 token,

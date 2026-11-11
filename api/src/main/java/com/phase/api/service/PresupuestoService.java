@@ -84,6 +84,9 @@ public class PresupuestoService {
     private void preparar(PresupuestoDTO presupuesto) {
         if (presupuesto.getFechaEmision() == null || presupuesto.getFechaEmision().isBlank()) {
             presupuesto.setFechaEmision(LocalDate.now().toString());
+        } else {
+            presupuesto.setFechaEmision(
+                    com.phase.api.common.FechaUtil.requerida(presupuesto.getFechaEmision(), "fechaEmision").toString());
         }
 
         BigDecimal subtotal = BigDecimal.ZERO;

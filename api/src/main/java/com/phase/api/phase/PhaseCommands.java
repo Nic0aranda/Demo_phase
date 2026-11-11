@@ -1,5 +1,6 @@
 package com.phase.api.phase;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -74,6 +75,30 @@ public final class PhaseCommands {
      */
     public static String writePartialJson(String global, String key, String json) {
         return writeJson(global, key, json, false);
+    }
+
+    /**
+     * Agrupa varias escrituras en un solo request a PhaseDB. Reduce la ventana
+     * en la que dos globales relacionados (por ejemplo pago y factura) pueden
+     * quedar inconsistentes.
+     */
+    public static String writeJsonBatch(List<WriteOp> operations) {
+        if (operations == null || operations.isEmpty()) {
+            throw new IllegalArgumentException("El batch de escritura no puede estar vacio");
+        }
+        StringBuilder command = new StringBuilder();
+        int index = 0;
+        for (WriteOp operation : operations) {
+            index++;
+            String variable = "J" + index;
+            String target = global(operation.global()) + "(" + subscript(operation.key()) + ")";
+            command.append("SET ").append(variable).append('=').append(quote(operation.json())).append('\n');
+            if (operation.replace()) {
+                command.append("KILL ").append(target).append('\n');
+            }
+            command.append("ZMERGE ").append(target).append('=').append(variable).append('\n');
+        }
+        return command.toString().trim();
     }
 
     public static String setScalar(String global, String key, String value) {

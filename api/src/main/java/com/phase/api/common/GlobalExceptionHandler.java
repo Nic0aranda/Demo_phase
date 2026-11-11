@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,6 +14,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,7 +28,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApi(ApiException ex, HttpServletRequest request) {
-        return ResponseEntity.status(ex.getStatus()).body(ApiError.of(
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(ex.getStatus());
+        if (ex.getStatus() == HttpStatus.TOO_MANY_REQUESTS && ex.getDetails() != null) {
+            String retryAfter = ex.getDetails().get("retryAfterSeconds");
+            if (retryAfter != null) {
+                builder.header(HttpHeaders.RETRY_AFTER, retryAfter);
+            }
+        }
+        return builder.body(ApiError.of(
                 ex.getStatus().value(),
                 ex.getCode(),
                 ex.getMessage(),
@@ -41,11 +51,14 @@ public class GlobalExceptionHandler {
         if (status.is5xxServerError()) {
             log.error("Error de PhaseDB code={} message={} requestId={}",
                     ex.getCode(), ex.getMessage(), ex.getRequestId(), ex);
+        } else {
+            log.warn("PhaseDB rechazo la operacion code={} message={} requestId={}",
+                    ex.getCode(), ex.getMessage(), ex.getRequestId());
         }
         return ResponseEntity.status(status).body(ApiError.of(
                 status.value(),
-                ex.getCode() == null ? "PHASE_ERROR" : ex.getCode(),
-                ex.getMessage(),
+                safePhaseCode(status),
+                safePhaseMessage(status),
                 request.getRequestURI(),
                 ex.getRequestId() == null ? requestId(request) : ex.getRequestId(),
                 null
@@ -111,6 +124,32 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(NoResourceFoundException ex,
+                                                   HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                404,
+                "NO_ENCONTRADO",
+                "El recurso solicitado no existe",
+                request.getRequestURI(),
+                requestId(request),
+                null
+        ));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> handleUploadSize(MaxUploadSizeExceededException ex,
+                                                    HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(ApiError.of(
+                413,
+                "ARCHIVO_DEMASIADO_GRANDE",
+                "El archivo supera el limite de 10 MB",
+                request.getRequestURI(),
+                requestId(request),
+                Map.of("archivo", "El archivo supera el limite de 10 MB")
+        ));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex, HttpServletRequest request) {
         String requestId = requestId(request);
@@ -142,7 +181,34 @@ public class GlobalExceptionHandler {
         };
     }
 
+    private String safePhaseCode(HttpStatus status) {
+        return switch (status) {
+            case NOT_FOUND -> "NO_ENCONTRADO";
+            case FORBIDDEN -> "SIN_PERMISO";
+            case CONFLICT -> "CONFLICTO";
+            case GATEWAY_TIMEOUT, SERVICE_UNAVAILABLE -> "SERVICIO_DATOS_NO_DISPONIBLE";
+            case INTERNAL_SERVER_ERROR -> "ERROR_INTERNO";
+            default -> "ERROR_DATOS";
+        };
+    }
+
+    private String safePhaseMessage(HttpStatus status) {
+        return switch (status) {
+            case NOT_FOUND -> "Recurso no encontrado en PhaseDB";
+            case FORBIDDEN -> "Operacion no permitida por PhaseDB";
+            case CONFLICT -> "Conflicto al guardar los datos";
+            case GATEWAY_TIMEOUT -> "El servicio de datos no respondio a tiempo";
+            case SERVICE_UNAVAILABLE -> "Servicio de datos no disponible";
+            case INTERNAL_SERVER_ERROR -> "Error interno al procesar los datos";
+            default -> "Error al comunicarse con el servicio de datos";
+        };
+    }
+
     private String requestId(HttpServletRequest request) {
+        Object requestId = request.getAttribute(RequestIdFilter.ATTRIBUTE);
+        if (requestId != null) {
+            return String.valueOf(requestId);
+        }
         Object phaseRequestId = request.getAttribute("phase.requestId");
         if (phaseRequestId != null) {
             return String.valueOf(phaseRequestId);

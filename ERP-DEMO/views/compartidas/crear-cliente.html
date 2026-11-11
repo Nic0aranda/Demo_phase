@@ -3,190 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Cliente - ERP Empresarial</title>
-    <!-- Referencias a los estilos -->
-    <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/components.css">
-    <link rel="stylesheet" href="../../css/forms.css">
+    <title>Nuevo cliente - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+    <link rel="stylesheet" href="../../CSS/forms.css">
 </head>
-<body>
+<body data-page="crear-cliente" data-require-role="admin,comercial">
 
     <div class="app-container">
-        <!-- BARRA LATERAL (SIDEBAR) -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">N</span>
-                    <div class="logo-text">
-                        <strong>ERP EMPRESARIAL</strong>
-                        <span>Portal de empresa</span>
-                    </div>
-                </div>
-            </div>
+        <aside class="sidebar"></aside>
 
-            <div class="user-profile">
-                <div class="avatar">LM</div>
-                <div class="user-info">
-                    <strong>Laura Martínez</strong>
-                    <span>Administrador</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <p class="menu-label">GENERAL</p>
-                <ul>
-                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
-                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
-                    <li class="active"><a href="clientes.html">Clientes</a></li>
-                    <li><a href="operaciones.html">Operaciones</a></li>
-                    <li><a href="facturacion.html">Facturación</a></li>
-                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
-                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
-                    <li><a href="notas-credito.html">Notas de crédito</a></li>
-                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn-logout">
-                    Cerrar sesión
-                </button>
-            </div>
-        </aside>
-        <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content">
-            <!-- CABECERA -->
+            <div class="breadcrumb">
+                <a href="clientes.html">Clientes</a>
+                <span class="separator">/</span>
+                <span>Nuevo cliente</span>
+            </div>
+
             <header class="topbar">
                 <div class="header-titles">
-                    <div class="breadcrumb">
-                        <a href="clientes.html">Clientes</a> <span class="separator">/</span> <strong>Crear cliente</strong>
-                    </div>
-                    <h1>Crear cliente</h1>
-                    <p>Registra una nueva empresa y sus datos de contacto.</p>
-                </div>
-                
-                <div class="header-actions">
-                    <div class="search-bar">
-                        <span>🔍</span>
-                        <input type="text" placeholder="Buscar en el portal...">
-                    </div>
+                    <span class="badge">TIPO DE CUENTA</span>
+                    <h1 id="clienteFormTitle">Nuevo cliente</h1>
+                    <p id="clienteFormSubtitle">Registra una empresa o persona para operar con ella en el ERP.</p>
                 </div>
             </header>
 
-            <!-- FORMULARIO CREAR CLIENTE -->
-            <div class="card form-card">
+            <section class="card form-card">
                 <div class="form-card-header">
-                    <p>Completa la información de la empresa. Los campos marcados con <span class="required">*</span> son obligatorios.</p>
+                    Completa los datos obligatorios marcados con <span class="required">*</span>.
                 </div>
 
-                <form action="listado.html" method="GET">
-                    
-                    <!-- Sección: Datos generales -->
+                <form id="clienteForm" novalidate>
                     <div class="form-section">
                         <div class="form-section-info">
-                            <h3>Datos generales</h3>
-                            <p>Información principal para identificar al cliente.</p>
+                            <h3>Identificación</h3>
+                            <p>Nombre legal y documento tributario del cliente.</p>
                         </div>
                         <div class="form-section-fields">
-                            <div class="form-group">
-                                <label for="nombre">Nombre o razón social <span class="required">*</span></label>
-                                <input type="text" id="nombre" placeholder="Ej. Norte Sur S.A." required>
-                            </div>
-                            <div class="form-group">
-                                <label for="glosa">Glosa o descripción</label>
-                                <textarea id="glosa" rows="3" placeholder="Añade una breve descripción de la empresa, actividad o relación comercial..." maxlength="250"></textarea>
-                                <span class="char-count">Máximo 250 caracteres</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sección: Identificación tributaria -->
-                    <div class="form-section">
-                        <div class="form-section-info">
-                            <h3>Identificación tributaria</h3>
-                            <p>Documento legal asociado a la empresa.</p>
-                        </div>
-                        <div class="form-section-fields grid-2-cols">
-                            <div class="form-group">
-                                <label for="tipoDoc">Tipo de documento <span class="required">*</span></label>
-                                <select id="tipoDoc" required>
-                                    <option value="" disabled selected>Seleccionar tipo</option>
-                                    <option value="rut">RUT</option>
-                                    <option value="pasaporte">Pasaporte</option>
-                                    <option value="dni">DNI Extranjero</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="numDoc">Número de documento <span class="required">*</span></label>
-                                <input type="text" id="numDoc" placeholder="Ej. 76.234.567-8" required>
+                            <div class="grid-2-cols">
+                                <div class="form-group">
+                                    <label for="nombre">Nombre o razón social <span class="required">*</span></label>
+                                    <input type="text" id="nombre" name="nombre" maxlength="120" placeholder="Ej. Comercial Andes SpA" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="glosa">Glosa</label>
+                                    <input type="text" id="glosa" name="glosa" maxlength="250" placeholder="Ej. Cliente mayorista">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tipoDoc">Tipo de documento <span class="required">*</span></label>
+                                    <select id="tipoDoc" name="tipoDoc" required>
+                                        <option value="RUT">RUT</option>
+                                        <option value="PASAPORTE">Pasaporte</option>
+                                        <option value="DNI">DNI</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="numDoc">Número de documento <span class="required">*</span></label>
+                                    <input type="text" id="numDoc" name="numDoc" maxlength="20" placeholder="Ej. 76123456-7" required>
+                                    <span class="field-help">Para RUT usa el formato 12345678-9 (sin puntos).</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Sección: Dirección -->
                     <div class="form-section">
                         <div class="form-section-info">
-                            <h3>Dirección</h3>
-                            <p>Ubicación comercial y datos territoriales.</p>
+                            <h3>Ubicación</h3>
+                            <p>País, región y dirección donde opera el cliente.</p>
                         </div>
                         <div class="form-section-fields">
                             <div class="grid-2-cols">
                                 <div class="form-group">
                                     <label for="pais">País <span class="required">*</span></label>
-                                    <select id="pais" required>
-                                        <option value="" disabled selected>Seleccionar país</option>
+                                    <select id="pais" name="pais" required>
                                         <option value="cl">Chile</option>
-                                        <option value="ar">Argentina</option>
                                         <option value="pe">Perú</option>
+                                        <option value="ar">Argentina</option>
+                                        <option value="bo">Bolivia</option>
+                                        <option value="co">Colombia</option>
+                                        <option value="ec">Ecuador</option>
+                                        <option value="mx">México</option>
+                                        <option value="py">Paraguay</option>
+                                        <option value="uy">Uruguay</option>
+                                        <option value="us">Estados Unidos</option>
+                                        <option value="es">España</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="region">Región <span class="required">*</span></label>
-                                    <select id="region" required>
-                                        <option value="" disabled selected>Seleccionar región</option>
-                                        <option value="rm">Región Metropolitana</option>
-                                        <option value="v">Valparaíso</option>
-                                    </select>
+                                    <label for="region">Región / estado <span class="required">*</span></label>
+                                    <input type="text" id="region" name="region" maxlength="80" placeholder="Ej. Metropolitana" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="direccion">Dirección <span class="required">*</span></label>
+                                    <input type="text" id="direccion" name="direccion" maxlength="200" placeholder="Ej. Av. Providencia 1234" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono</label>
+                                    <input type="text" id="telefono" name="telefono" maxlength="30" placeholder="Ej. +56 9 1234 5678">
                                 </div>
                             </div>
-                            <div class="form-group" style="margin-top: 15px;">
-                                <label for="direccion">Dirección <span class="required">*</span></label>
-                                <input type="text" id="direccion" placeholder="Calle, número y oficina" required>
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Sección: Datos de contacto -->
                     <div class="form-section">
                         <div class="form-section-info">
-                            <h3>Datos de contacto</h3>
-                            <p>Canales para comunicaciones y seguimiento.</p>
-                            <p class="note">Podrás editar esta información más adelante desde la ficha del cliente.</p>
+                            <h3>Contacto</h3>
+                            <p>Correo donde se enviarán facturas y comunicaciones.</p>
                         </div>
-                        <div class="form-section-fields grid-2-cols">
-                            <div class="form-group">
-                                <label for="telefono">Teléfono</label>
-                                <input type="text" id="telefono" placeholder="Ej. +56 9 12345678">
-                            </div>
+                        <div class="form-section-fields">
                             <div class="form-group">
                                 <label for="email">Email <span class="required">*</span></label>
-                                <input type="email" id="email" placeholder="contacto@empresa.cl" required>
+                                <input type="email" id="email" name="email" maxlength="120" placeholder="contacto@empresa.com" required>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Acciones del Formulario -->
                     <div class="form-actions">
-                        <a href="clientes.html" class="btn-secondary" style="text-decoration: none;">Cancelar</a>
-                        <button type="submit" class="btn-primary">✓ Crear cliente</button>
+                        <a href="clientes.html" class="btn-secondary">Cancelar</a>
+                        <button type="submit" id="clienteSubmit" class="btn-primary">✓ Crear cliente</button>
                     </div>
-
                 </form>
-            </div>
+            </section>
         </main>
     </div>
 
-    <script src="../../js/sidebar.js"></script>
+    <script type="module" src="../../dist/main.js"></script>
 </body>
 </html>

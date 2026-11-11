@@ -3,125 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notas de Crédito - ERP Empresarial</title>
+    <title>Notas de crédito - ERP Empresarial</title>
     <link rel="stylesheet" href="../../CSS/Main.css">
     <link rel="stylesheet" href="../../CSS/layout.css">
     <link rel="stylesheet" href="../../CSS/components.css">
 </head>
-<body>
+<body data-page="notas">
 
     <div class="app-container">
-        <!-- BARRA LATERAL (SIDEBAR) -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">N</span>
-                    <div class="logo-text">
-                        <strong>ERP EMPRESARIAL</strong>
-                        <span>Portal de empresa</span>
-                    </div>
-                </div>
-            </div>
+        <aside class="sidebar"></aside>
 
-            <div class="user-profile">
-                <div class="avatar">LM</div>
-                <div class="user-info">
-                    <strong>Laura Martínez</strong>
-                    <span>Administrador</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <p class="menu-label">GENERAL</p>
-                <ul>
-                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
-                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
-                    <li><a href="clientes.html">Clientes</a></li>
-                    <li><a href="operaciones.html">Operaciones</a></li>
-                    <li><a href="facturacion.html">Facturación</a></li>
-                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
-                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
-                    <li class="active"><a href="notas-credito.html">Notas de crédito</a></li>
-                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn-logout">
-                    Cerrar sesión
-                </button>
-            </div>
-        </aside>
-
-        <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content">
             <header class="topbar">
                 <div class="header-titles">
-                    <span class="badge">ÁREA FINANCIERA</span>
-                    <h1>Notas de Crédito</h1>
-                    <p>Registro de devoluciones, descuentos y anulaciones de facturas.</p>
+                    <span class="badge">TIPO DE CUENTA</span>
+                    <h1>Notas de crédito</h1>
+                    <p>Emite y anula notas que rebajan el saldo de las facturas.</p>
                 </div>
-                
                 <div class="header-actions">
-                    <a href="crear-nota-credito.html" class="btn-primary">+ Emitir Nota de Crédito</a>
+                    <div class="search-bar">
+                        <input type="search" id="notaSearch" placeholder="Buscar nota, factura o cliente…"
+                            aria-label="Buscar notas de crédito">
+                    </div>
+                    <select id="notaTipoFilter" aria-label="Filtrar por tipo" style="width:170px;">
+                        <option value="">Todos los tipos</option>
+                        <option value="ANULACION">Anulación</option>
+                        <option value="DESCUENTO">Descuento</option>
+                        <option value="DEVOLUCION">Devolución</option>
+                    </select>
+                    <a href="crear-nota-credito.html" class="btn-primary" data-write-roles="admin,contabilidad">+ Nueva nota</a>
                 </div>
             </header>
 
-            <!-- BUSCADOR -->
-            <div class="view-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div class="search-bar search-large">
-                    <span>🔍</span>
-                    <input type="text" placeholder="Buscar por N° NC, Factura o Cliente..." style="width: 380px;">
-                </div>
-            </div>
+            <section id="notasKpis" class="kpi-cards mb-20"></section>
 
-            <!-- TABLA DE NOTAS DE CRÉDITO -->
-            <div class="card table-card">
+            <section class="card table-card">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>N° NC</th>
-                            <th>FACTURA REF.</th>
+                            <th>NOTA</th>
+                            <th>FACTURA</th>
                             <th>CLIENTE</th>
-                            <th>FECHA EMISIÓN</th>
-                            <th>MONTO (NEGATIVO)</th>
-                            <th>MOTIVO</th>
+                            <th>TIPO</th>
+                            <th>MONTO NETO</th>
+                            <th>TOTAL</th>
+                            <th>FECHA</th>
                             <th>ESTADO</th>
+                            <th>ACCIONES</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>NC-2026-089</strong></td>
-                            <td>FAC-2026-1038</td>
-                            <td>Exportadora Sur</td>
-                            <td>12 Oct 2026</td>
-                            <td style="color: #dc2626;"><strong>- € 400,00</strong></td>
-                            <td>Descuento por volumen</td>
-                            <td><span class="status-badge active">Emitida</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>NC-2026-088</strong></td>
-                            <td>FAC-2026-1025</td>
-                            <td>Constructora Andes</td>
-                            <td>05 Oct 2026</td>
-                            <td style="color: #dc2626;"><strong>- € 1.200,00</strong></td>
-                            <td>Devolución de mercancía parcial</td>
-                            <td><span class="status-badge active">Emitida</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>NC-2026-087</strong></td>
-                            <td>FAC-2026-1011</td>
-                            <td>Servicios Norte</td>
-                            <td>20 Sep 2026</td>
-                            <td style="color: #dc2626;"><strong>- € 8.280,00</strong></td>
-                            <td>Anulación total (Error en RUT)</td>
-                            <td><span class="status-badge active">Emitida</span></td>
-                        </tr>
+                    <tbody id="notasTableBody">
+                        <tr><td colspan="9" class="table-message">Cargando notas de crédito…</td></tr>
                     </tbody>
                 </table>
-            </div>
+            </section>
         </main>
     </div>
-    <script src="../../js/sidebar.js"></script>
+
+    <script type="module" src="../../dist/main.js"></script>
 </body>
 </html>

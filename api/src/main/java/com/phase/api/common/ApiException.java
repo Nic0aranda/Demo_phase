@@ -56,4 +56,13 @@ public class ApiException extends RuntimeException {
     public static ApiException forbidden(String message) {
         return new ApiException(HttpStatus.FORBIDDEN, "SIN_PERMISO", message);
     }
+
+    public static ApiException tooManyRequests(String code, String message, long retryAfterSeconds) {
+        return new ApiException(
+                HttpStatus.TOO_MANY_REQUESTS,
+                code,
+                message,
+                Map.of("retryAfterSeconds", String.valueOf(Math.max(1, retryAfterSeconds)))
+        );
+    }
 }

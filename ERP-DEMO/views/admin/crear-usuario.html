@@ -3,154 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Usuario - ERP Empresarial</title>
-    <!-- Referencias a los estilos -->
+    <title>Crear usuario - ERP Empresarial</title>
     <link rel="stylesheet" href="../../CSS/Main.css">
     <link rel="stylesheet" href="../../CSS/layout.css">
     <link rel="stylesheet" href="../../CSS/components.css">
     <link rel="stylesheet" href="../../CSS/forms.css">
 </head>
-<body>
+<body data-page="crear-usuario" data-require-role="admin">
 
     <div class="app-container">
-        <!-- BARRA LATERAL (SIDEBAR) -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">N</span>
-                    <div class="logo-text">
-                        <strong>ERP EMPRESARIAL</strong>
-                        <span>Portal de empresa</span>
-                    </div>
-                </div>
-            </div>
+        <aside class="sidebar"></aside>
 
-            <div class="user-profile">
-                <div class="avatar">LM</div>
-                <div class="user-info">
-                    <strong>Laura Martínez</strong>
-                    <span>Administrador</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <p class="menu-label">GENERAL</p>
-                <ul>
-                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
-                    <li><a href="dashboard.html">Panel principal</a></li>
-                    <li><a href="../compartidas/clientes.html">Clientes</a></li>
-                    <li><a href="../compartidas/operaciones.html">Operaciones</a></li>
-                    <li><a href="../compartidas/facturacion.html">Facturación</a></li>
-                    <li><a href="../compartidas/cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
-                    <li><a href="../compartidas/conciliacion-bancaria.html">Conciliación bancaria</a></li>
-                    <li><a href="../compartidas/notas-credito.html">Notas de crédito</a></li>
-                    <li class="active"><a href="users.html">Gestión de usuarios</a></li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn-logout">
-                    Cerrar sesión
-                </button>
-            </div>
-        </aside>
-
-        <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content">
-            <!-- CABECERA -->
+            <div class="breadcrumb">
+                <a href="users.html">Usuarios</a>
+                <span class="separator">/</span>
+                <span>Nuevo usuario</span>
+            </div>
+
             <header class="topbar">
                 <div class="header-titles">
-                    <div class="breadcrumb">
-                        <a href="dashboard.html">Administración</a> <span class="separator">/</span> <strong>Crear usuario</strong>
-                    </div>
-                    <h1>Crear usuario</h1>
-                    <p>Configura nuevos accesos y asigna roles dentro de la plataforma.</p>
-                </div>
-                
-                <div class="header-actions">
-                    <button class="btn-secondary">Gestionar Permisos</button>
+                    <span class="badge">TIPO DE CUENTA</span>
+                    <h1 id="usuarioFormTitle">Nuevo usuario</h1>
+                    <p id="usuarioFormSubtitle">Crea una cuenta y define su rol y permisos.</p>
                 </div>
             </header>
 
-            <!-- FORMULARIO CREAR USUARIO -->
-            <div class="card form-card">
+            <section class="card form-card">
                 <div class="form-card-header">
-                    <p>Introduce los datos del nuevo empleado. Los campos marcados con <span class="required">*</span> son obligatorios.</p>
+                    Los campos marcados con <span class="required">*</span> son obligatorios.
                 </div>
 
-                <form action="dashboard.html" method="GET">
-                    
-                    <!-- Sección: Datos Personales -->
+                <form id="usuarioForm" novalidate>
                     <div class="form-section">
                         <div class="form-section-info">
                             <h3>Datos personales</h3>
-                            <p>Información básica del colaborador.</p>
-                        </div>
-                        <div class="form-section-fields grid-2-cols">
-                            <div class="form-group">
-                                <label for="nombres">Nombres <span class="required">*</span></label>
-                                <input type="text" id="nombres" placeholder="Ej. Carlos" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="apellidos">Apellidos <span class="required">*</span></label>
-                                <input type="text" id="apellidos" placeholder="Ej. Vega" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sección: Credenciales -->
-                    <div class="form-section">
-                        <div class="form-section-info">
-                            <h3>Credenciales de acceso</h3>
-                            <p>Datos requeridos para el inicio de sesión.</p>
-                            <p class="note">Se enviará un correo automático para que el usuario genere su contraseña.</p>
+                            <p>Identifica a la persona que usará el ERP.</p>
                         </div>
                         <div class="form-section-fields">
+                            <div class="grid-2-cols">
+                                <div class="form-group">
+                                    <label for="nombres">Nombres <span class="required">*</span></label>
+                                    <input type="text" id="nombres" name="nombres" maxlength="80" placeholder="Ej. Laura" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="apellidos">Apellidos <span class="required">*</span></label>
+                                    <input type="text" id="apellidos" name="apellidos" maxlength="80" placeholder="Ej. Martínez" required>
+                                </div>
+                            </div>
                             <div class="form-group">
-                                <label for="email">Correo corporativo <span class="required">*</span></label>
-                                <input type="email" id="email" placeholder="carlos.vega@empresa.com" required>
+                                <label for="email">Correo electrónico <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" maxlength="120" placeholder="usuario@empresa.com" autocomplete="off" required>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Sección: Asignación de Rol -->
                     <div class="form-section">
                         <div class="form-section-info">
-                            <h3>Perfil y permisos</h3>
-                            <p>Define el nivel de acceso y visualización dentro del ERP.</p>
+                            <h3>Acceso y rol</h3>
+                            <p>Define el perfil de acceso y el estado inicial de la cuenta.</p>
                         </div>
-                        <div class="form-section-fields grid-2-cols">
-                            <div class="form-group">
-                                <label for="rol">Rol del sistema <span class="required">*</span></label>
-                                <select id="rol" required>
-                                    <option value="" disabled selected>Seleccionar rol</option>
-                                    <option value="admin">Administrador Global</option>
-                                    <option value="comercial">Área Comercial</option>
-                                    <option value="operaciones">Área Operativa</option>
-                                    <option value="contabilidad">Contabilidad y Finanzas</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="estado">Estado inicial <span class="required">*</span></label>
-                                <select id="estado" required>
-                                    <option value="activo" selected>Activo</option>
-                                    <option value="inactivo">Inactivo (Suspendido)</option>
-                                </select>
+                        <div class="form-section-fields">
+                            <div class="grid-2-cols">
+                                <div class="form-group">
+                                    <label for="rol">Rol <span class="required">*</span></label>
+                                    <select id="rol" name="rol" required>
+                                        <option value="comercial">Comercial</option>
+                                        <option value="operaciones">Operaciones</option>
+                                        <option value="contabilidad">Contabilidad</option>
+                                        <option value="admin">Administrador</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="estado">Estado <span class="required">*</span></label>
+                                    <select id="estado" name="estado" required>
+                                        <option value="activo">Activo</option>
+                                        <option value="inactivo">Inactivo</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Contraseña <span class="required">*</span></label>
+                                    <input type="password" id="password" name="password" minlength="8" maxlength="72"
+                                        autocomplete="new-password">
+                                    <span class="field-help" id="passwordHelp">La contraseña debe tener entre 8 y 72 caracteres.</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="passwordConfirm">Confirmar contraseña <span class="required">*</span></label>
+                                    <input type="password" id="passwordConfirm" name="passwordConfirm" minlength="8" maxlength="72"
+                                        autocomplete="new-password">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Acciones del Formulario -->
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Permisos adicionales</h3>
+                            <p>Los permisos se suman a los del rol seleccionado. Son opcionales.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <div id="permisosContainer" class="checkbox-group"></div>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
-                        <a href="dashboard.html" class="btn-secondary" style="text-decoration: none;">Cancelar</a>
-                        <button type="submit" class="btn-primary">✓ Registrar usuario</button>
+                        <a href="users.html" class="btn-secondary">Cancelar</a>
+                        <button type="submit" id="usuarioSubmit" class="btn-primary">✓ Crear usuario</button>
                     </div>
-
                 </form>
-            </div>
+            </section>
         </main>
     </div>
 
-    <script src="../../js/sidebar.js"></script>
+    <script type="module" src="../../dist/main.js"></script>
 </body>
 </html>

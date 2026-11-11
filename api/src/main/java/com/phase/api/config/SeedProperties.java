@@ -7,7 +7,7 @@ public class SeedProperties {
 
     private boolean enabled = true;
     private String adminEmail = "admin@empresa.com";
-    private String adminPassword = "admin123";
+    private String adminPassword;
     private String adminName = "Administrador";
     private String adminApellidos = "ERP";
 

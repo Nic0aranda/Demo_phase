@@ -29,15 +29,24 @@ public class SecurityConfig {
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final CorsProperties corsProperties;
+    private final SecurityProperties securityProperties;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
-                          CorsProperties corsProperties) {
+                          CorsProperties corsProperties,
+                          SecurityProperties securityProperties) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.corsProperties = corsProperties;
+        this.securityProperties = securityProperties;
+        if (corsProperties.getAllowedOrigins() != null
+                && corsProperties.getAllowedOrigins().stream()
+                        .anyMatch(origin -> origin != null && origin.contains("${"))) {
+            throw new IllegalStateException(
+                    "erp.cors.allowed-origins es obligatorio (define ERP_CORS_ORIGINS en produccion)");
+        }
     }
 
     @Bean
@@ -56,17 +65,22 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/v1/auth/login",
-                                "/api/v1/health",
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(
+                            "/api/v1/auth/login",
+                            "/api/v1/health",
+                            "/error"
+                    ).permitAll();
+                    if (securityProperties.isSwaggerPublic()) {
+                        auth.requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/error"
-                        ).permitAll()
-                        .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+                                "/swagger-ui.html"
+                        ).permitAll();
+                    }
+                    auth.requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN");
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -78,7 +92,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Location", "Authorization"));
+        configuration.setExposedHeaders(List.of("Location", "Authorization", "X-Request-Id"));
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
 

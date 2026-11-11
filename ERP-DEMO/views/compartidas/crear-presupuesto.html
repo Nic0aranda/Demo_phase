@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo presupuesto - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+    <link rel="stylesheet" href="../../CSS/forms.css">
+</head>
+<body data-page="crear-presupuesto" data-require-role="admin,comercial">
+
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="presupuestos.html">Presupuestos</a>
+                <span class="separator">/</span>
+                <span id="presupuestoFormBreadcrumb">Nuevo presupuesto</span>
+            </div>
+
+            <header class="topbar">
+                <div class="header-titles">
+                    <span class="badge">TIPO DE CUENTA</span>
+                    <h1 id="presupuestoFormTitle">Nuevo presupuesto</h1>
+                    <p id="presupuestoFormSubtitle">Propón los conceptos; el total y los impuestos se calculan en el servidor.</p>
+                </div>
+            </header>
+
+            <section class="card form-card">
+                <div class="form-card-header">
+                    Los campos marcados con <span class="required">*</span> son obligatorios.
+                </div>
+
+                <form id="presupuestoForm" novalidate>
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Datos generales</h3>
+                            <p>Cliente, fecha de emisión y estado comercial de la propuesta.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <div class="grid-2-cols">
+                                <div class="form-group">
+                                    <label for="presupuestoCliente">Cliente <span class="required">*</span></label>
+                                    <input type="text" id="presupuestoCliente" name="presupuestoCliente" list="clientesList"
+                                        maxlength="160" placeholder="Nombre o RUT del cliente" autocomplete="off" required>
+                                    <datalist id="clientesList"></datalist>
+                                </div>
+                                <div class="form-group">
+                                    <label for="presupuestoFecha">Fecha de emisión <span class="required">*</span></label>
+                                    <input type="date" id="presupuestoFecha" name="presupuestoFecha" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="presupuestoEstado">Estado <span class="required">*</span></label>
+                                    <select id="presupuestoEstado" name="presupuestoEstado" required>
+                                        <option value="BORRADOR" selected>Borrador</option>
+                                        <option value="ENVIADO">Enviado</option>
+                                        <option value="APROBADO">Aprobado</option>
+                                        <option value="RECHAZADO">Rechazado</option>
+                                    </select>
+                                    <span class="field-help">El estado también se puede cambiar desde el listado.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Conceptos</h3>
+                            <p>Agrega una o más líneas de detalle. El IVA se aplica según la configuración del servidor.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <table class="concept-table">
+                                <thead>
+                                    <tr>
+                                        <th>DESCRIPCIÓN</th>
+                                        <th style="width:110px;">CANTIDAD</th>
+                                        <th style="width:150px;">PRECIO UNIT.</th>
+                                        <th style="width:130px;">TOTAL</th>
+                                        <th style="width:50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="presupuestoItemsBody"></tbody>
+                            </table>
+                            <button type="button" id="addPresupuestoItemBtn" class="btn-secondary mt-20">+ Agregar concepto</button>
+
+                            <div class="totals-panel">
+                                <div>
+                                    <span>Subtotal</span>
+                                    <span id="presupuestoSubtotal">—</span>
+                                </div>
+                                <div>
+                                    <span>Impuestos</span>
+                                    <span id="presupuestoImpuestos">—</span>
+                                </div>
+                                <div class="total-final">
+                                    <span>Total</span>
+                                    <span id="presupuestoTotal">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="presupuestos.html" class="btn-secondary">Cancelar</a>
+                        <button type="submit" id="presupuestoSubmit" class="btn-primary">✓ Crear presupuesto</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../../dist/main.js"></script>
+</body>
+</html>

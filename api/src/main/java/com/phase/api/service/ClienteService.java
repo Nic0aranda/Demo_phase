@@ -3,6 +3,7 @@ package com.phase.api.service;
 import tools.jackson.databind.ObjectMapper;
 import com.phase.api.common.ApiException;
 import com.phase.api.common.PageResponse;
+import com.phase.api.common.PhaseLockService;
 import com.phase.api.common.RutValidator;
 import com.phase.api.config.ValidationProperties;
 import com.phase.api.dto.ClienteDTO;
@@ -24,49 +25,56 @@ public class ClienteService {
     private final PhaseClient phaseClient;
     private final ObjectMapper objectMapper;
     private final boolean validateRutDv;
+    private final PhaseLockService lockService;
 
     public ClienteService(PhaseClient phaseClient,
                           ObjectMapper objectMapper,
-                          ValidationProperties validationProperties) {
+                          ValidationProperties validationProperties,
+                          PhaseLockService lockService) {
         this.phaseClient = phaseClient;
         this.objectMapper = objectMapper;
         this.validateRutDv = validationProperties.isRutDv();
+        this.lockService = lockService;
     }
 
     public ClienteDTO crear(ClienteDTO dto) {
         String key = normalizarDocumento(dto.getNumDoc());
-        dto.setNumDoc(key);
-        dto.setTipoDoc(normalizarTipoDoc(dto.getTipoDoc()));
-        dto.setPais(normalizarPais(dto.getPais()));
-        dto.setActivo(true);
-        validarDocumento(dto);
+        return lockService.conLock("CLIENTE:" + key, () -> {
+            dto.setNumDoc(key);
+            dto.setTipoDoc(normalizarTipoDoc(dto.getTipoDoc()));
+            dto.setPais(normalizarPais(dto.getPais()));
+            dto.setActivo(true);
+            validarDocumento(dto);
 
-        if (phaseClient.exists(GLOBAL, key)) {
-            throw ApiException.conflict("CLIENTE_EXISTE", "Ya existe un cliente con el documento " + key);
-        }
+            if (phaseClient.exists(GLOBAL, key)) {
+                throw ApiException.conflict("CLIENTE_EXISTE", "Ya existe un cliente con el documento " + key);
+            }
 
-        guardar(dto);
-        return dto;
+            guardar(dto);
+            return dto;
+        });
     }
 
     public ClienteDTO actualizar(String numDoc, ClienteDTO dto) {
         String key = normalizarDocumento(numDoc);
-        if (!phaseClient.exists(GLOBAL, key)) {
-            throw ApiException.notFound("Cliente no encontrado: " + numDoc);
-        }
+        return lockService.conLock("CLIENTE:" + key, () -> {
+            if (!phaseClient.exists(GLOBAL, key)) {
+                throw ApiException.notFound("Cliente no encontrado: " + numDoc);
+            }
 
-        String bodyKey = normalizarDocumento(dto.getNumDoc());
-        if (bodyKey != null && !bodyKey.equals(key)) {
-            throw ApiException.badRequest("DOCUMENTO_INMUTABLE",
-                    "El documento del cliente no se puede cambiar en esta operacion");
-        }
+            String bodyKey = normalizarDocumento(dto.getNumDoc());
+            if (bodyKey != null && !bodyKey.equals(key)) {
+                throw ApiException.badRequest("DOCUMENTO_INMUTABLE",
+                        "El documento del cliente no se puede cambiar en esta operacion");
+            }
 
-        dto.setNumDoc(key);
-        dto.setTipoDoc(normalizarTipoDoc(dto.getTipoDoc()));
-        dto.setPais(normalizarPais(dto.getPais()));
-        validarDocumento(dto);
-        guardar(dto);
-        return dto;
+            dto.setNumDoc(key);
+            dto.setTipoDoc(normalizarTipoDoc(dto.getTipoDoc()));
+            dto.setPais(normalizarPais(dto.getPais()));
+            validarDocumento(dto);
+            guardar(dto);
+            return dto;
+        });
     }
 
     public ClienteDTO obtener(String numDoc) {
@@ -118,10 +126,12 @@ public class ClienteService {
 
     public void cambiarActivo(String numDoc, boolean activo) {
         String key = normalizarDocumento(numDoc);
-        if (!phaseClient.exists(GLOBAL, key)) {
-            throw ApiException.notFound("Cliente no encontrado: " + numDoc);
-        }
-        phaseClient.writePartialJson(GLOBAL, key, "{\"activo\":" + activo + "}");
+        lockService.conLock("CLIENTE:" + key, () -> {
+            if (!phaseClient.exists(GLOBAL, key)) {
+                throw ApiException.notFound("Cliente no encontrado: " + numDoc);
+            }
+            phaseClient.writePartialJson(GLOBAL, key, "{\"activo\":" + activo + "}");
+        });
     }
 
     public List<ClienteDTO> listarTodos() {

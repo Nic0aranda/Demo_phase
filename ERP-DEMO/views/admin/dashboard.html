@@ -3,181 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrador - ERP Empresarial</title>
-    <!-- Referencias a los estilos ubicados en la carpeta CSS/ -->
+    <title>Panel principal - ERP Empresarial</title>
     <link rel="stylesheet" href="../../CSS/Main.css">
     <link rel="stylesheet" href="../../CSS/layout.css">
     <link rel="stylesheet" href="../../CSS/components.css">
 </head>
-<body>
+<body data-page="dashboard">
 
     <div class="app-container">
-        <!-- BARRA LATERAL (SIDEBAR) ESTANDARIZADA -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">N</span>
-                    <div class="logo-text">
-                        <strong>ERP EMPRESARIAL</strong>
-                        <span>Portal de empresa</span>
-                    </div>
-                </div>
-            </div>
+        <aside class="sidebar"></aside>
 
-            <div class="user-profile">
-                <div class="avatar">LM</div>
-                <div class="user-info">
-                    <strong>Laura Martínez</strong>
-                    <span>Administrador</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <p class="menu-label">GENERAL</p>
-                <ul>
-                    <li class="active"><a href="dashboard.html">Panel principal</a></li>
-                    <li><a href="../compartidas/clientes.html">Clientes</a></li>
-                    <li><a href="../compartidas/operaciones.html">Operaciones</a></li>
-                    <li><a href="../compartidas/facturacion.html">Facturación</a></li>
-                    <li><a href="../compartidas/cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
-                    <li><a href="../compartidas/conciliacion-bancaria.html">Conciliación bancaria</a></li>
-                    <li><a href="../compartidas/notas-credito.html">Notas de crédito</a></li>
-                    <li><a href="users.html">Gestión de usuarios</a></li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn-logout">
-                    Cerrar sesión
-                </button>
-            </div>
-        </aside>
-
-        <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content">
-            <!-- CABECERA -->
             <header class="topbar">
                 <div class="header-titles">
-                    <span class="badge">TIPO DE CUENTA: Administrador</span>
-                    <h1>Buenos días, Laura</h1>
-                    <p>Visión global de la organización y sus operaciones.</p>
+                    <span class="badge" id="dashboard-badge">TIPO DE CUENTA</span>
+                    <h1 id="dashboard-greeting">Panel principal</h1>
+                    <p id="dashboard-subtitle">Cargando indicadores…</p>
                 </div>
-                
-                <div class="header-actions">
-                    <div class="search-bar">
-                        <span>🔍</span>
-                        <input type="text" placeholder="Buscar en el portal...">
-                    </div>
-                    <button class="btn-secondary">Exportar</button>
-                    <!-- Enlace directo a crear usuario desde el dashboard -->
-                    <a href="crear-usuario.html" style="text-decoration: none;">
-                        <button class="btn-primary">+ Crear usuario</button>
-                    </a>
-                </div>
+                <div class="header-actions" id="dashboard-actions"></div>
             </header>
 
-            <!-- GRID DEL DASHBOARD -->
-            <div class="dashboard-grid">
-                
-                <!-- Tarjetas de KPIs (Indicadores) -->
-                <div class="kpi-cards">
-                    <div class="card kpi-card">
-                        <h3>Ingresos mensuales</h3>
-                        <div class="kpi-value">€ 428,6 mil</div>
-                        <p class="trend positive">↑ 12,4% Objetivo € 450 mil</p>
-                    </div>
-                    <div class="card kpi-card">
-                        <h3>Margen operativo</h3>
-                        <div class="kpi-value">24,8%</div>
-                        <p class="trend positive">↑ +2,1 pp Promedio del trimestre</p>
-                    </div>
-                    <div class="card kpi-card">
-                        <h3>Usuarios activos</h3>
-                        <div class="kpi-value">286</div>
-                        <p class="trend neutral">de 312 licencias</p>
-                    </div>
+            <section id="dashboard-root" class="dashboard-grid">
+                <div class="card empty-state">
+                    <p>Cargando indicadores…</p>
                 </div>
-
-                <!-- Alertas / Tareas pendientes -->
-                <div class="alerts-section">
-                    <div class="card alert-card critical">
-                        <div class="alert-icon">3</div>
-                        <div class="alert-text">
-                            <h4>Incidencias críticas</h4>
-                            <p>1 requiere aprobación</p>
-                        </div>
-                    </div>
-                    <div class="card alert-card warning">
-                        <div class="alert-icon">⚠️</div>
-                        <div class="alert-text">
-                            <h4>Cierre contable pendiente</h4>
-                            <p>Faltan 2 aprobaciones para cerrar sept.</p>
-                        </div>
-                        <a href="#">Revisar ></a>
-                    </div>
-                    <div class="card alert-card warning">
-                        <div class="alert-icon">🔐</div>
-                        <div class="alert-text">
-                            <h4>Accesos de riesgo detectados</h4>
-                            <p>3 inicios de sesión requieren validación.</p>
-                        </div>
-                        <a href="users.html">Validar ></a>
-                    </div>
-                    <div class="card alert-card info">
-                        <div class="alert-icon">🔄</div>
-                        <div class="alert-text">
-                            <h4>Actualización de integración</h4>
-                            <p>El conector bancario se renovará esta noche.</p>
-                        </div>
-                        <a href="#">Ver plan ></a>
-                    </div>
-                </div>
-
-                <!-- Gráfico y Estado -->
-                <div class="main-widgets">
-                    <!-- Gráfico (Simulado) -->
-                    <div class="card chart-widget">
-                        <div class="widget-header">
-                            <h3>Evolución de ingresos</h3>
-                            <p>Facturación consolidada de todas las áreas</p>
-                        </div>
-                        <div class="chart-placeholder">
-                            <div class="fake-chart">€ 428.600 (+8,4% vs. periodo anterior)</div>
-                        </div>
-                    </div>
-
-                    <!-- Estado del Sistema -->
-                    <div class="card system-widget">
-                        <div class="widget-header">
-                            <h3>Estado del sistema</h3>
-                            <p>Situación actual y prioridades.</p>
-                        </div>
-                        <ul class="system-list">
-                            <li>
-                                <span>Servicios principales</span>
-                                <span class="status-ok">12 de 12 disponibles</span>
-                            </li>
-                            <li>
-                                <span>Almacenamiento</span>
-                                <span class="status-warn">2,1 TB utilizados (68%)</span>
-                            </li>
-                            <li>
-                                <span>Copias de seguridad</span>
-                                <span class="status-ok">Última: hoy, 03:15 (Al día)</span>
-                            </li>
-                            <li>
-                                <span>Licencias</span>
-                                <span>Renovación en 42 días (26 libres)</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
+            </section>
         </main>
     </div>
 
-    <!-- Script centralizado para el sidebar y cerrar sesión -->
-    <script src="../../JS/sidebar.js"></script>
+    <script type="module" src="../../dist/main.js"></script>
 </body>
 </html>

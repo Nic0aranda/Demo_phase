@@ -2,6 +2,7 @@ package com.phase.api.phase;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import com.phase.api.common.RequestIdFilter;
 import com.phase.api.config.PhaseProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,10 @@ public class HttpPhaseClient implements PhaseClient {
     private final ObjectMapper objectMapper;
 
     public HttpPhaseClient(RestClient.Builder builder, PhaseProperties properties, ObjectMapper objectMapper) {
+        if (isUnresolved(properties.getUsername()) || isUnresolved(properties.getPassword())) {
+            throw new IllegalStateException(
+                    "erp.phase.username y erp.phase.password son obligatorios (define ERP_PHASE_USER y ERP_PHASE_PASSWORD en produccion)");
+        }
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout((int) properties.getConnectTimeout().toMillis());
         requestFactory.setReadTimeout((int) properties.getReadTimeout().toMillis());
@@ -35,39 +40,54 @@ public class HttpPhaseClient implements PhaseClient {
         this.objectMapper = objectMapper;
     }
 
+    private static boolean isUnresolved(String value) {
+        return value == null || value.isBlank() || value.contains("${");
+    }
+
     @Override
     public PhaseResponse executeRaw(String command) {
+        String requestId = RequestIdFilter.currentRequestId();
         String body;
         try {
             body = restClient.post()
                     .uri("/v1/execute")
                     .contentType(MediaType.APPLICATION_JSON)
+                    .headers(headers -> {
+                        if (requestId != null) {
+                            headers.set(RequestIdFilter.HEADER, requestId);
+                        }
+                    })
                     .body(Map.of("command", command))
                     .retrieve()
                     .body(String.class);
         } catch (RestClientResponseException e) {
+            log.error("PhaseDB respondio HTTP {} requestId={} body={}",
+                    e.getStatusCode().value(), requestId, e.getResponseBodyAsString());
             throw new PhaseException(
                     "HTTP_" + e.getStatusCode().value(),
-                    "PhaseDB respondio " + e.getStatusCode() + ": " + e.getResponseBodyAsString(),
-                    null,
+                    "No se pudo completar la operacion con PhaseDB",
+                    requestId,
                     e);
         } catch (Exception e) {
+            log.error("No se pudo conectar con PhaseDB requestId={}: {}", requestId, e.getMessage(), e);
             throw new PhaseException(
                     "PHASE_CONNECTION",
-                    "No se pudo conectar con PhaseDB: " + e.getMessage(),
-                    null,
+                    "No se pudo conectar con PhaseDB",
+                    requestId,
                     e);
         }
 
         if (body == null || body.isBlank()) {
-            throw new PhaseException("PHASE_EMPTY", "PhaseDB devolvio una respuesta vacia");
+            log.error("PhaseDB devolvio una respuesta vacia requestId={}", requestId);
+            throw new PhaseException("PHASE_EMPTY", "PhaseDB devolvio una respuesta vacia", requestId);
         }
 
         PhaseResponse response;
         try {
             response = objectMapper.readValue(body, PhaseResponse.class);
         } catch (Exception e) {
-            throw new PhaseException("PHASE_PARSE", "Respuesta invalida de PhaseDB: " + e.getMessage(), null, e);
+            log.error("Respuesta invalida de PhaseDB requestId={}: {}", requestId, e.getMessage(), e);
+            throw new PhaseException("PHASE_PARSE", "Respuesta invalida de PhaseDB", requestId, e);
         }
 
         if (!response.isOk()) {
@@ -76,7 +96,10 @@ public class HttpPhaseClient implements PhaseClient {
                     ? "Error desconocido de PhaseDB"
                     : response.getError().getMessage();
             log.warn("PhaseDB error code={} message={} requestId={}", code, message, response.getRequestId());
-            throw new PhaseException(code, message, response.getRequestId());
+            throw new PhaseException(
+                    code,
+                    "PhaseDB rechazo la operacion",
+                    response.getRequestId() == null ? requestId : response.getRequestId());
         }
 
         return response;
@@ -91,8 +114,14 @@ public class HttpPhaseClient implements PhaseClient {
     @Override
     public boolean health() {
         try {
+            String requestId = RequestIdFilter.currentRequestId();
             String body = restClient.get()
                     .uri("/v1/health")
+                    .headers(headers -> {
+                        if (requestId != null) {
+                            headers.set(RequestIdFilter.HEADER, requestId);
+                        }
+                    })
                     .retrieve()
                     .body(String.class);
             JsonNode node = objectMapper.readTree(body);

@@ -141,6 +141,7 @@ public class OperacionDTO {
 
         private String fecha;
         private String archivo;
+        private String archivoToken;
 
         public String getTipo() {
             return tipo;
@@ -172,6 +173,14 @@ public class OperacionDTO {
 
         public void setArchivo(String archivo) {
             this.archivo = archivo;
+        }
+
+        public String getArchivoToken() {
+            return archivoToken;
+        }
+
+        public void setArchivoToken(String archivoToken) {
+            this.archivoToken = archivoToken;
         }
     }
 }

@@ -1,11 +1,18 @@
 package com.phase.api.service;
 
 import com.phase.api.common.ApiException;
+import com.phase.api.common.FacturaActualizadaEvent;
+import com.phase.api.common.FechaUtil;
+import com.phase.api.common.PhaseLockService;
 import com.phase.api.common.SequenceService;
 import com.phase.api.dto.FacturaDTO;
 import com.phase.api.dto.PagoDTO;
 import com.phase.api.phase.PhaseClient;
 import com.phase.api.phase.PhaseJson;
+import com.phase.api.phase.WriteOp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -22,6 +29,8 @@ import java.util.Set;
 @Service
 public class PagoService {
 
+    private static final Logger log = LoggerFactory.getLogger(PagoService.class);
+
     public static final String GLOBAL = "PAGOS";
 
     private static final Set<String> MEDIOS =
@@ -34,53 +43,69 @@ public class PagoService {
     private final FacturaService facturaService;
     private final NotaCreditoService notaCreditoService;
     private final ClienteService clienteService;
+    private final PhaseLockService lockService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public PagoService(PhaseClient phaseClient,
                        ObjectMapper objectMapper,
                        SequenceService sequenceService,
                        FacturaService facturaService,
                        NotaCreditoService notaCreditoService,
-                       ClienteService clienteService) {
+                       ClienteService clienteService,
+                       PhaseLockService lockService,
+                       ApplicationEventPublisher eventPublisher) {
         this.phaseClient = phaseClient;
         this.objectMapper = objectMapper;
         this.sequenceService = sequenceService;
         this.facturaService = facturaService;
         this.notaCreditoService = notaCreditoService;
         this.clienteService = clienteService;
+        this.lockService = lockService;
+        this.eventPublisher = eventPublisher;
     }
 
     public PagoDTO registrar(PagoDTO dto) {
-        FacturaDTO factura = facturaService.obtenerPorId(dto.facturaId());
-        if ("ANULADA".equalsIgnoreCase(factura.getEstado())) {
-            throw ApiException.conflict("FACTURA_ANULADA", "No se pueden registrar pagos de una factura anulada");
-        }
+        return lockService.conLock("FACTURA:" + dto.facturaId(), () -> {
+            FacturaDTO factura = facturaService.obtenerPorId(dto.facturaId());
+            if ("ANULADA".equalsIgnoreCase(factura.getEstado())) {
+                throw ApiException.conflict("FACTURA_ANULADA", "No se pueden registrar pagos de una factura anulada");
+            }
 
-        BigDecimal monto = dto.monto().setScale(2, RoundingMode.HALF_UP);
-        BigDecimal pendiente = calcularPendiente(factura);
-        if (monto.compareTo(pendiente) > 0) {
-            throw ApiException.unprocessable("MONTO_EXCEDE_SALDO",
-                    "El pago supera el saldo pendiente de la factura",
-                    Map.of("monto", "Saldo pendiente: " + pendiente));
-        }
+            BigDecimal monto = dto.monto().setScale(2, RoundingMode.HALF_UP);
+            BigDecimal pendiente = calcularPendiente(factura);
+            if (monto.compareTo(pendiente) > 0) {
+                throw ApiException.unprocessable("MONTO_EXCEDE_SALDO",
+                        "El pago supera el saldo pendiente de la factura",
+                        Map.of("monto", "Saldo pendiente: " + pendiente));
+            }
 
-        LocalDate fecha = parseFecha(dto.fecha());
-        PagoDTO pago = new PagoDTO(
-                sequenceService.nextId("PAG"),
-                factura.getId(),
-                factura.getRutCliente(),
-                clienteService.nombreDe(factura.getRutCliente()),
-                fecha.toString(),
-                monto,
-                normalizarMedio(dto.medioPago()),
-                trim(dto.referencia()),
-                trim(dto.observacion()),
-                "REGISTRADO"
-        );
+            LocalDate fecha = FechaUtil.opcional(dto.fecha(), "fecha", LocalDate.now());
+            PagoDTO pago = new PagoDTO(
+                    sequenceService.nextId("PAG"),
+                    factura.getId(),
+                    factura.getRutCliente(),
+                    clienteService.nombreDe(factura.getRutCliente()),
+                    fecha.toString(),
+                    monto,
+                    normalizarMedio(dto.medioPago()),
+                    trim(dto.referencia()),
+                    trim(dto.observacion()),
+                    "REGISTRADO"
+            );
 
-        guardar(pago);
-        facturaService.actualizarEstado(factura.getId(),
-                pendiente.subtract(monto).signum() <= 0 ? "PAGADA" : "PENDIENTE");
-        return pago;
+            String estadoFactura = pendiente.subtract(monto).signum() <= 0 ? "PAGADA" : "PENDIENTE";
+            try {
+                phaseClient.writeJsonBatch(List.of(
+                        WriteOp.replace(GLOBAL, pago.id(), PhaseJson.toJson(pago, objectMapper)),
+                        WriteOp.merge(FacturaService.GLOBAL, factura.getId(),
+                                "{\"estado\":\"" + estadoFactura + "\"}")
+                ));
+            } catch (RuntimeException e) {
+                compensarPago(pago.id(), e);
+                throw e;
+            }
+            return pago;
+        });
     }
 
     public List<PagoDTO> listarTodos() {
@@ -108,21 +133,19 @@ public class PagoService {
 
     public PagoDTO anular(String id) {
         PagoDTO pago = obtener(id);
-        if (!"REGISTRADO".equalsIgnoreCase(pago.estado())) {
-            throw ApiException.conflict("PAGO_YA_ANULADO", "El pago ya esta anulado");
-        }
+        return lockService.conLock("FACTURA:" + pago.facturaId(), () -> {
+            PagoDTO actual = obtener(id);
+            if (!"REGISTRADO".equalsIgnoreCase(actual.estado())) {
+                throw ApiException.conflict("PAGO_YA_ANULADO", "El pago ya esta anulado");
+            }
 
-        PagoDTO anulado = new PagoDTO(
-                pago.id(), pago.facturaId(), pago.rutCliente(), pago.cliente(), pago.fecha(),
-                pago.monto(), pago.medioPago(), pago.referencia(), pago.observacion(), "ANULADO");
-        guardar(anulado);
-
-        FacturaDTO factura = facturaService.obtenerPorId(pago.facturaId());
-        if ("PAGADA".equalsIgnoreCase(factura.getEstado())
-                && calcularPendiente(factura).signum() > 0) {
-            facturaService.actualizarEstado(factura.getId(), "PENDIENTE");
-        }
-        return anulado;
+            PagoDTO anulado = new PagoDTO(
+                    actual.id(), actual.facturaId(), actual.rutCliente(), actual.cliente(), actual.fecha(),
+                    actual.monto(), actual.medioPago(), actual.referencia(), actual.observacion(), "ANULADO");
+            guardar(anulado);
+            publicarRecalculo(actual.facturaId());
+            return anulado;
+        });
     }
 
     public BigDecimal calcularPendiente(FacturaDTO factura) {
@@ -140,22 +163,28 @@ public class PagoService {
         return normalized;
     }
 
-    private LocalDate parseFecha(String value) {
-        if (value == null || value.isBlank()) {
-            return LocalDate.now();
-        }
-        try {
-            return LocalDate.parse(value.trim());
-        } catch (Exception e) {
-            return LocalDate.now();
-        }
-    }
-
     private String trim(String value) {
         return value == null ? null : value.trim();
     }
 
     private void guardar(PagoDTO pago) {
         phaseClient.writeJson(GLOBAL, pago.id(), PhaseJson.toJson(pago, objectMapper), true);
+    }
+
+    private void compensarPago(String pagoId, RuntimeException causa) {
+        log.warn("Compensando pago {} tras fallo de escritura: {}", pagoId, causa.getMessage());
+        try {
+            phaseClient.kill(GLOBAL, pagoId);
+        } catch (RuntimeException e) {
+            log.error("No se pudo compensar el pago {}", pagoId, e);
+        }
+    }
+
+    private void publicarRecalculo(String facturaId) {
+        try {
+            eventPublisher.publishEvent(new FacturaActualizadaEvent(facturaId));
+        } catch (RuntimeException e) {
+            log.warn("No se pudo recalcular la factura {}: {}", facturaId, e.getMessage());
+        }
     }
 }

@@ -26,11 +26,15 @@ public class UsuarioService {
     private final PhaseClient phaseClient;
     private final ObjectMapper objectMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UsuarioEstadoService usuarioEstadoService;
 
-    public UsuarioService(PhaseClient phaseClient, ObjectMapper objectMapper, PasswordEncoder passwordEncoder) {
+    public UsuarioService(PhaseClient phaseClient, ObjectMapper objectMapper,
+                          PasswordEncoder passwordEncoder,
+                          UsuarioEstadoService usuarioEstadoService) {
         this.phaseClient = phaseClient;
         this.objectMapper = objectMapper;
         this.passwordEncoder = passwordEncoder;
+        this.usuarioEstadoService = usuarioEstadoService;
     }
 
     public String normalizarEmail(String email) {
@@ -209,6 +213,7 @@ public class UsuarioService {
     private void guardar(UsuarioRecord record) {
         String json = PhaseJson.toJson(record, objectMapper);
         phaseClient.writeJson(GLOBAL, record.getEmail(), json, true);
+        usuarioEstadoService.invalidar(record.getEmail());
     }
 
     private boolean coincide(UsuarioRecord record, String query) {

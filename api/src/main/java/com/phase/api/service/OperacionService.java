@@ -6,10 +6,14 @@ import com.phase.api.common.SequenceService;
 import com.phase.api.dto.OperacionDTO;
 import com.phase.api.phase.PhaseClient;
 import com.phase.api.phase.PhaseJson;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,13 +29,16 @@ public class OperacionService {
     private final PhaseClient phaseClient;
     private final ObjectMapper objectMapper;
     private final SequenceService sequenceService;
+    private final ArchivoOperacionService archivoOperacionService;
 
     public OperacionService(PhaseClient phaseClient,
                             ObjectMapper objectMapper,
-                            SequenceService sequenceService) {
+                            SequenceService sequenceService,
+                            ArchivoOperacionService archivoOperacionService) {
         this.phaseClient = phaseClient;
         this.objectMapper = objectMapper;
         this.sequenceService = sequenceService;
+        this.archivoOperacionService = archivoOperacionService;
     }
 
     public OperacionDTO crearOperacion(OperacionDTO operacion) {
@@ -86,9 +93,79 @@ public class OperacionService {
         return operacion;
     }
 
+    public OperacionDTO agregarDocumentoConArchivo(String id,
+                                                   String tipo,
+                                                   String numero,
+                                                   String fecha,
+                                                   MultipartFile archivo) {
+        Map<String, String> errores = new LinkedHashMap<>();
+        if (tipo == null || tipo.isBlank()) {
+            errores.put("tipo", "El tipo de documento es obligatorio");
+        }
+        if (numero == null || numero.isBlank()) {
+            errores.put("numero", "El numero de documento es obligatorio");
+        }
+        if (archivo == null || archivo.isEmpty()) {
+            errores.put("archivo", "Selecciona un archivo");
+        }
+        if (!errores.isEmpty()) {
+            throw ApiException.unprocessable(
+                    "VALIDACION",
+                    "Los datos enviados no son validos",
+                    errores
+            );
+        }
+
+        OperacionDTO operacion = obtenerPorId(id);
+        ArchivoOperacionService.ArchivoGuardado guardado = archivoOperacionService.guardar(id, archivo);
+
+        OperacionDTO.DocumentoOperacionDTO documento = new OperacionDTO.DocumentoOperacionDTO();
+        documento.setTipo(tipo.trim());
+        documento.setNumero(numero.trim());
+        documento.setFecha(fecha == null || fecha.isBlank() ? null : fecha.trim());
+        documento.setArchivo(guardado.nombre());
+        documento.setArchivoToken(guardado.token());
+
+        if (operacion.getDocumentos() == null) {
+            operacion.setDocumentos(new ArrayList<>());
+        }
+        operacion.getDocumentos().add(documento);
+        try {
+            guardar(operacion);
+        } catch (RuntimeException ex) {
+            archivoOperacionService.eliminar(id, guardado.token());
+            throw ex;
+        }
+        return operacion;
+    }
+
+    public DocumentoArchivo obtenerArchivo(String id, String token) {
+        OperacionDTO.DocumentoOperacionDTO documento = buscarDocumentoPorToken(id, token);
+        Resource recurso = archivoOperacionService.cargar(id, token);
+        String nombre = documento.getArchivo();
+        if (nombre == null || nombre.isBlank()) {
+            nombre = "documento";
+        }
+        return new DocumentoArchivo(recurso, nombre, archivoOperacionService.contentType(id, token));
+    }
+
+    private OperacionDTO.DocumentoOperacionDTO buscarDocumentoPorToken(String id, String token) {
+        OperacionDTO operacion = obtenerPorId(id);
+        if (operacion.getDocumentos() == null || token == null) {
+            throw ApiException.notFound("Archivo no encontrado");
+        }
+        return operacion.getDocumentos().stream()
+                .filter(documento -> token.equals(documento.getArchivoToken()))
+                .findFirst()
+                .orElseThrow(() -> ApiException.notFound("Archivo no encontrado"));
+    }
+
     private void preparar(OperacionDTO operacion) {
         if (operacion.getFechaInicio() == null || operacion.getFechaInicio().isBlank()) {
             operacion.setFechaInicio(LocalDate.now().toString());
+        } else {
+            operacion.setFechaInicio(
+                    com.phase.api.common.FechaUtil.requerida(operacion.getFechaInicio(), "fechaInicio").toString());
         }
         if (operacion.getTipoOperacion() != null) {
             operacion.setTipoOperacion(operacion.getTipoOperacion().trim().toUpperCase(Locale.ROOT));
@@ -118,5 +195,8 @@ public class OperacionService {
     private void guardar(OperacionDTO operacion) {
         String json = PhaseJson.toJson(operacion, objectMapper);
         phaseClient.writeJson(GLOBAL, operacion.getId(), json, true);
+    }
+
+    public record DocumentoArchivo(Resource recurso, String nombre, MediaType contentType) {
     }
 }

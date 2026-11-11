@@ -3,44 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/login.css">
+    <title>Iniciar sesión - ERP Empresarial</title>
+    <link rel="stylesheet" href="CSS/Main.css">
+    <link rel="stylesheet" href="CSS/login.css">
+    <link rel="stylesheet" href="CSS/components.css">
 </head>
-<body>
+<body data-page="login">
 
     <div class="login-container">
         <div class="login-branding">
-            <img src="" alt="Logo de la empresa">
+            <h2>ERP EMPRESARIAL</h2>
+            <p>Gestiona clientes, operaciones, facturación y cobranza desde un solo lugar.</p>
         </div>
 
-        <!-- Form login-->
         <div class="login-form-section">
             <h1>Bienvenido de nuevo</h1>
             <p class="subtitle">Introduce tus credenciales para acceder a tu espacio de trabajo.</p>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Correo electrónico</label>
-                <input type="email" id="email" placeholder="nombre@empresa.com" required>
-            </div>
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="nombre@empresa.com"
+                        autocomplete="username" maxlength="120" required>
+                </div>
 
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" placeholder="Introduce tu contraseña" required>
-            </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="Introduce tu contraseña"
+                        autocomplete="current-password" maxlength="72" required>
+                </div>
 
-            <div class="form-options">
-                <a href="#" class="forgot-password">¿Has olvidado tu contraseña?</a>
-            </div>
+                <div id="errorMessage" class="login-error" role="alert"></div>
 
-            <!--mensajes de error-->
-            <div id="errorMessage" style="color: #e74c3c; font-size: 13px; margin-bottom: 15px; display: none;">
-                Credenciales incorrectas.
-            </div>
-
-            <button type="submit" class="btn-login">Iniciar sesión</button>
-        </form>
+                <button type="submit" id="loginBtn" class="btn-login">Iniciar sesión</button>
+            </form>
 
             <div class="security-notice">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -51,6 +47,7 @@
             </div>
         </div>
     </div>
-    <script src="JS/auth.js"></script>
+
+    <script type="module" src="dist/main.js"></script>
 </body>
 </html>

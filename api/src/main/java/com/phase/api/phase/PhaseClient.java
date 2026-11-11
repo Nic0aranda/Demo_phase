@@ -18,5 +18,14 @@ public interface PhaseClient {
 
     void writePartialJson(String global, String key, String json);
 
+    /**
+     * Ejecuta varias escrituras en un solo comando Phase. La implementacion por
+     * defecto usa {@link #execute(String)}, que ya envia el comando completo a
+     * PhaseDB en una sola peticion HTTP.
+     */
+    default void writeJsonBatch(java.util.List<WriteOp> operations) {
+        execute(PhaseCommands.writeJsonBatch(operations));
+    }
+
     void kill(String global, String key);
 }

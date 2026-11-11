@@ -21,7 +21,11 @@ public class JwtService {
 
     public JwtService(JwtProperties properties) {
         this.properties = properties;
-        byte[] secret = properties.getSecret().getBytes(StandardCharsets.UTF_8);
+        String secretValue = properties.getSecret();
+        if (secretValue == null || secretValue.isBlank() || secretValue.contains("${")) {
+            throw new IllegalStateException("erp.jwt.secret es obligatorio (define ERP_JWT_SECRET en produccion)");
+        }
+        byte[] secret = secretValue.getBytes(StandardCharsets.UTF_8);
         if (secret.length < 32) {
             throw new IllegalStateException("erp.jwt.secret debe tener al menos 32 bytes para HS256");
         }

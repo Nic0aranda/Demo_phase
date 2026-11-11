@@ -2,6 +2,7 @@ package com.phase.api.security;
 
 import tools.jackson.databind.ObjectMapper;
 import com.phase.api.common.ApiError;
+import com.phase.api.common.RequestIdFilter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,11 +33,18 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         ApiError error = ApiError.of(
                 401,
                 "NO_AUTENTICADO",
-                "Debes iniciar sesion para acceder a este recurso",
+                "USUARIO_INACTIVO".equals(request.getAttribute("jwt.error"))
+                        ? "La cuenta esta inactiva"
+                        : "Debes iniciar sesion para acceder a este recurso",
                 request.getRequestURI(),
-                UUID.randomUUID().toString(),
+                requestId(request),
                 null
         );
         objectMapper.writeValue(response.getOutputStream(), error);
+    }
+
+    private String requestId(HttpServletRequest request) {
+        Object requestId = request.getAttribute(RequestIdFilter.ATTRIBUTE);
+        return requestId == null ? UUID.randomUUID().toString() : String.valueOf(requestId);
     }
 }

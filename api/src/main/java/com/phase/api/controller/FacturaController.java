@@ -73,7 +73,7 @@ public class FacturaController {
     @PatchMapping("/{id}/estado")
     @PreAuthorize("hasAnyRole('ADMIN','CONTABILIDAD')")
     public ResponseEntity<Void> actualizarEstado(@PathVariable String id,
-                                                 @RequestBody EstadoRequest request) {
+                                                 @Valid @RequestBody EstadoRequest request) {
         facturaService.actualizarEstado(id, request.estado());
         return ResponseEntity.noContent().build();
     }
@@ -104,6 +104,8 @@ public class FacturaController {
         return ResponseEntity.ok(facturaEnvioService.listarPorFactura(id));
     }
 
-    public record EstadoRequest(String estado) {
+    public record EstadoRequest(
+            @jakarta.validation.constraints.NotBlank(message = "El estado es obligatorio")
+            String estado) {
     }
 }

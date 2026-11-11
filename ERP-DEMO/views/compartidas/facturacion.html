@@ -4,249 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facturación - ERP Empresarial</title>
-    <!-- Referencias a los estilos en la carpeta CSS según tu estructura -->
     <link rel="stylesheet" href="../../CSS/Main.css">
     <link rel="stylesheet" href="../../CSS/layout.css">
     <link rel="stylesheet" href="../../CSS/components.css">
 </head>
-<body>
+<body data-page="facturacion">
 
     <div class="app-container">
-        <!-- BARRA LATERAL (SIDEBAR) -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">N</span>
-                    <div class="logo-text">
-                        <strong>ERP EMPRESARIAL</strong>
-                        <span>Portal de empresa</span>
-                    </div>
-                </div>
-            </div>
+        <aside class="sidebar"></aside>
 
-            <div class="user-profile">
-                <div class="avatar">LM</div>
-                <div class="user-info">
-                    <strong>Laura Martínez</strong>
-                    <span>Administrador</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <p class="menu-label">GENERAL</p>
-                <ul>
-                    <!-- Recuerda mover la clase "active" al <li> correspondiente según la página donde estés -->
-                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
-                    <li><a href="clientes.html">Clientes</a></li>
-                    <li><a href="operaciones.html">Operaciones</a></li>
-                    <li class="active"><a href="facturacion.html">Facturación</a></li>
-                    <li><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
-                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
-                    <li><a href="notas-credito.html">Notas de crédito</a></li>
-                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn-logout">
-                    Cerrar sesión
-                </button>
-            </div>
-        </aside>
-
-        <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content">
-            <!-- CABECERA -->
             <header class="topbar">
                 <div class="header-titles">
-                    <span class="badge">ÁREA FINANCIERA</span>
+                    <span class="badge">TIPO DE CUENTA</span>
                     <h1>Facturación</h1>
-                    <p>Control de ingresos, emisión de documentos y seguimiento de cobros.</p>
+                    <p>Emite facturas, revisa su detalle y registra pagos de clientes.</p>
                 </div>
-                
                 <div class="header-actions">
-                    <button class="btn-secondary">⬇️ Exportar Excel</button>
-                    <a href="crear-factura.html" class="btn-primary">+ Nueva Factura</a>
+                    <div class="search-bar">
+                        <input type="search" id="facturaSearch" placeholder="Buscar por factura, cliente o RUT…"
+                            aria-label="Buscar facturas">
+                    </div>
+                    <select id="facturaEstado" class="filter-select" aria-label="Filtrar por estado" style="width:170px;">
+                        <option value="">Todos los estados</option>
+                        <option value="PENDIENTE">Pendiente</option>
+                        <option value="PAGADA">Pagada</option>
+                        <option value="VENCIDA">Vencida</option>
+                        <option value="ANULADA">Anulada</option>
+                    </select>
+                    <a href="crear-factura.html" class="btn-primary" data-write-roles="admin,contabilidad">+ Nueva factura</a>
                 </div>
             </header>
 
-            <!-- KPIs DE FACTURACIÓN -->
-            <div class="kpi-cards" style="margin-bottom: 25px;">
-                <div class="card kpi-card">
-                    <h3>Facturado este mes</h3>
-                    <div class="kpi-value">€ 142.500</div>
-                    <p class="trend positive">↑ 8.5% vs mes anterior</p>
-                </div>
-                <div class="card kpi-card">
-                    <h3>Pendiente de cobro</h3>
-                    <div class="kpi-value" style="color: #d97706;">€ 38.200</div>
-                    <p class="trend neutral">14 facturas emitidas</p>
-                </div>
-                <div class="card kpi-card">
-                    <h3>Facturas Vencidas</h3>
-                    <div class="kpi-value" style="color: #dc2626;">€ 12.400</div>
-                    <p class="trend">⚠️ Requiere gestión de cobro</p>
-                </div>
-            </div>
+            <section id="facturacionKpis" class="kpi-cards mb-20"></section>
 
-            <!-- FILTROS -->
-            <div class="view-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div class="search-bar search-large">
-                    <span>🔍</span>
-                    <input type="text" placeholder="Buscar por N° Factura, Cliente o RUT..." style="width: 380px;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <select class="btn-secondary" style="padding: 8px 15px; border-radius: 6px; border-color: var(--border-color); outline: none;">
-                        <option value="todos">Todos los estados</option>
-                        <option value="pagada">Pagadas</option>
-                        <option value="pendiente">Pendientes</option>
-                        <option value="vencida">Vencidas</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- TABLA DE FACTURAS -->
-            <div class="card table-card">
+            <section class="card table-card">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>N° FACTURA</th>
+                            <th>FACTURA</th>
                             <th>CLIENTE</th>
                             <th>EMISIÓN</th>
                             <th>VENCIMIENTO</th>
-                            <th>MONTO</th>
+                            <th>TOTAL</th>
                             <th>ESTADO</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>FAC-2026-1042</strong></td>
-                            <td>Import. Andina SpA</td>
-                            <td>01 Oct 2026</td>
-                            <td>31 Oct 2026</td>
-                            <td><strong>€ 12.500,00</strong></td>
-                            <td><span class="status-badge process">Pendiente</span></td>
-                            <td>
-                                <button class="btn-ver-detalle" style="background: none; border: none; color: var(--primary-purple); cursor: pointer; font-weight: bold;">Ver detalle</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>FAC-2026-1041</strong></td>
-                            <td>Constructora Andes</td>
-                            <td>25 Sep 2026</td>
-                            <td>25 Oct 2026</td>
-                            <td><strong>€ 8.350,00</strong></td>
-                            <td><span class="status-badge active">Pagada</span></td>
-                            <td>
-                                <button class="btn-ver-detalle" style="background: none; border: none; color: var(--primary-purple); cursor: pointer; font-weight: bold;">Ver detalle</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>FAC-2026-1038</strong></td>
-                            <td>Exportadora Sur</td>
-                            <td>15 Ago 2026</td>
-                            <td>15 Sep 2026</td>
-                            <td><strong>€ 4.120,00</strong></td>
-                            <td><span class="status-badge error">Vencida</span></td>
-                            <td>
-                                <button class="btn-ver-detalle" style="background: none; border: none; color: var(--primary-purple); cursor: pointer; font-weight: bold;">Ver detalle</button>
-                            </td>
-                        </tr>
+                    <tbody id="facturasTableBody">
+                        <tr><td colspan="7" class="table-message">Cargando facturas…</td></tr>
                     </tbody>
                 </table>
-            </div>
-
-            <!-- MODAL DE DETALLE DE FACTURA -->
-            <div id="invoiceModal" class="modal-overlay">
-                <div class="modal-content" style="width: 700px;">
-                    <div class="modal-header">
-                        <h2>Detalle de Factura: FAC-2026-1042</h2>
-                        <button class="close-modal" id="closeInvoiceBtn">&times;</button>
-                    </div>
-                    
-                    <div class="modal-body">
-                        <!-- Cabecera de la factura -->
-                        <div class="invoice-meta">
-                            <div>
-                                <span>Cliente</span>
-                                <span>Import. Andina SpA (76.123.456-7)</span>
-                            </div>
-                            <div>
-                                <span>Operación Asociada</span>
-                                <span>OP-001 - Importación Marítima</span>
-                            </div>
-                            <div>
-                                <span>Fecha de Emisión</span>
-                                <span>01 Octubre 2026</span>
-                            </div>
-                            <div>
-                                <span>Fecha de Vencimiento</span>
-                                <span style="color: #d97706; font-weight: bold;">31 Octubre 2026</span>
-                            </div>
-                        </div>
-
-                        <!-- Líneas de la factura -->
-                        <table class="invoice-items-table">
-                            <thead>
-                                <tr>
-                                    <th>Descripción del Servicio</th>
-                                    <th style="text-align: center;">Cant.</th>
-                                    <th class="money">Precio Unit.</th>
-                                    <th class="money">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Flete Marítimo (Shenzhen - Valparaíso)</td>
-                                    <td style="text-align: center;">1</td>
-                                    <td class="money">€ 8.500,00</td>
-                                    <td class="money">€ 8.500,00</td>
-                                </tr>
-                                <tr>
-                                    <td>Gastos de Origen (THC, BL Fee)</td>
-                                    <td style="text-align: center;">1</td>
-                                    <td class="money">€ 1.200,00</td>
-                                    <td class="money">€ 1.200,00</td>
-                                </tr>
-                                <tr>
-                                    <td>Seguro de Carga Internacional</td>
-                                    <td style="text-align: center;">1</td>
-                                    <td class="money">€ 804,20</td>
-                                    <td class="money">€ 804,20</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <!-- Resumen de totales -->
-                        <div class="invoice-summary">
-                            <div class="summary-row">
-                                <span>Subtotal</span>
-                                <span>€ 10.504,20</span>
-                            </div>
-                            <div class="summary-row">
-                                <span>Impuestos (IVA 19%)</span>
-                                <span>€ 1.995,80</span>
-                            </div>
-                            <div class="summary-row total">
-                                <span>Total a Pagar</span>
-                                <span>€ 12.500,00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="btn-secondary" id="emailInvoiceBtn">✉️ Enviar Email</button>
-                        <button class="btn-secondary" id="downloadInvoiceBtn">⬇️ Descargar PDF</button>
-                        <button class="btn-primary">Registrar Pago</button>
-                    </div>
-                </div>
-            </div>
-
+            </section>
         </main>
     </div>
 
-    <script src="../../js/sidebar.js"></script>
-    <script src="../../js/facturacion.js"></script>
+    <div class="modal-overlay" id="invoiceModal" aria-hidden="true">
+        <div class="modal-content modal-large" role="dialog" aria-modal="true" aria-labelledby="invoiceModalTitle">
+            <div class="modal-header">
+                <h2 id="invoiceModalTitle">Detalle de factura</h2>
+                <button type="button" class="close-modal" data-close-modal aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body" id="invoiceModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" data-close-modal>Cerrar</button>
+                <button type="button" class="btn-secondary" id="invoiceEmailBtn">Enviar por email</button>
+                <button type="button" class="btn-secondary" id="invoicePdfBtn">Descargar PDF</button>
+                <button type="button" class="btn-primary" id="invoicePayBtn" hidden>Registrar pago</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../dist/main.js"></script>
 </body>
 </html>

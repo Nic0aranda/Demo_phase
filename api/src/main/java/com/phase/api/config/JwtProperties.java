@@ -7,7 +7,7 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "erp.jwt")
 public class JwtProperties {
 
-    private String secret = "erp-demo-secret-change-me-2026-11-03-please-use-32-bytes";
+    private String secret;
     private Duration expiration = Duration.ofHours(8);
     private String issuer = "erp-api";
 

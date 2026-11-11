@@ -3,98 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Cobranza - ERP Empresarial</title>
+    <title>Gestión de cobranza - ERP Empresarial</title>
     <link rel="stylesheet" href="../../CSS/Main.css">
     <link rel="stylesheet" href="../../CSS/layout.css">
     <link rel="stylesheet" href="../../CSS/components.css">
-    <link rel="stylesheet" href="../../CSS/forms.css">
 </head>
-<body>
-    <div class="app-container">
-        <!-- BARRA LATERAL ESTANDARIZADA -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo"><span class="logo-icon">N</span><div class="logo-text"><strong>ERP EMPRESARIAL</strong><span>Portal de empresa</span></div></div>
-            </div>
-            <div class="user-profile">
-                <div class="avatar">LM</div><div class="user-info"><strong>Laura Martínez</strong><span>Administrador</span></div>
-            </div>
-            <nav class="sidebar-menu">
-                <p class="menu-label">GENERAL</p>
-                <ul>
-                    <li><a href="../admin/dashboard.html">Panel principal</a></li>
-                    <li><a href="clientes.html">Clientes</a></li>
-                    <li><a href="operaciones.html">Operaciones</a></li>
-                    <li><a href="facturacion.html">Facturación</a></li>
-                    <li class="active"><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a></li>
-                    <li><a href="conciliacion-bancaria.html">Conciliación bancaria</a></li>
-                    <li><a href="notas-credito.html">Notas de crédito</a></li>
-                    <li><a href="../admin/users.html">Gestión de usuarios</a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
-            </div>
-        </aside>
+<body data-page="cobranza">
 
-        <!-- CONTENIDO PRINCIPAL -->
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+
         <main class="main-content">
             <header class="topbar">
                 <div class="header-titles">
-                    <div class="breadcrumb"><a href="cuentas-por-cobrar.html">Cuentas por cobrar</a> <span class="separator">/</span> <strong>Gestión de Deuda</strong></div>
-                    <h1>Gestión: Exportadora Sur</h1>
-                    <p>Acciones de cobranza para la factura FAC-2026-1038.</p>
+                    <span class="badge">TIPO DE CUENTA</span>
+                    <h1>Gestión de cobranza</h1>
+                    <p>Contacta a los clientes, registra recordatorios y acuerda promesas de pago.</p>
+                </div>
+                <div class="header-actions">
+                    <a href="cuentas-por-cobrar.html" class="btn-secondary">Volver a cartera</a>
+                    <button type="button" id="clearCobranzaFilter" class="btn-primary" hidden>Ver toda la cartera</button>
                 </div>
             </header>
 
-            <div class="card form-card">
-                <!-- Resumen de la deuda -->
-                <div style="background: #fef7e0; border: 1px solid #f29900; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between;">
-                    <div><span style="font-size: 12px; color: #b45309; font-weight: bold;">ESTADO ACTUAL</span><br><span style="font-size: 16px; font-weight: bold;">Atraso de 29 días</span></div>
-                    <div style="text-align: right;"><span style="font-size: 12px; color: #b45309; font-weight: bold;">MONTO PENDIENTE</span><br><span style="font-size: 16px; font-weight: bold; color: #dc2626;">€ 4.120,00</span></div>
+            <section id="cobranzaKpis" class="kpi-cards mb-20"></section>
+
+            <section class="card table-card mb-20">
+                <div class="table-card-header">
+                    <div>
+                        <h3>Facturas pendientes</h3>
+                        <p>Selecciona una factura para enviar un recordatorio o registrar una promesa.</p>
+                    </div>
                 </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>CLIENTE</th>
+                            <th>FACTURA</th>
+                            <th>VENCIMIENTO</th>
+                            <th>PENDIENTE</th>
+                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cobranzaTableBody">
+                        <tr><td colspan="6" class="table-message">Cargando cartera…</td></tr>
+                    </tbody>
+                </table>
+            </section>
 
-                <form action="cuentas-por-cobrar.html" method="GET">
-                    <div class="form-section">
-                        <div class="form-section-info">
-                            <h3>Comunicación Sugerida</h3>
-                            <p>El sistema ha generado este mensaje basado en los días de atraso y el perfil del cliente. Puedes editarlo antes de enviarlo.</p>
-                        </div>
-                        <div class="form-section-fields">
-                            <div class="form-group">
-                                <label>Canal de envío</label>
-                                <select>
-                                    <option value="email" selected>Correo Electrónico Oficial (finanzas@exportadorasur.cl)</option>
-                                    <option value="whatsapp">WhatsApp Corporativo</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin-top: 15px;">
-                                <label>Asunto</label>
-                                <input type="text" value="URGENTE: Saldo Vencido - Factura FAC-2026-1038">
-                            </div>
-                            <div class="form-group" style="margin-top: 15px;">
-                                <label>Mensaje</label>
-                                <textarea rows="6">Estimado equipo de Exportadora Sur,
-
-Nos ponemos en contacto para notificarles que su cuenta presenta un atraso significativo (29 días). Requerimos el pago inmediato del saldo de € 4.120,00 correspondiente a la factura FAC-2026-1038 para evitar la suspensión temporal de los servicios logísticos en curso.
-
-Si el pago ya fue realizado, por favor envíenos el comprobante respondiendo a este correo.
-
-Atentamente,
-Departamento de Finanzas.</textarea>
-                            </div>
+            <div class="main-widgets">
+                <section class="card table-card">
+                    <div class="table-card-header">
+                        <div>
+                            <h3>Recordatorios enviados</h3>
+                            <p>Historial de comunicaciones por correo.</p>
                         </div>
                     </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>FECHA</th>
+                                <th>FACTURA</th>
+                                <th>CLIENTE</th>
+                                <th>CANAL</th>
+                                <th>ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordatoriosTableBody">
+                            <tr><td colspan="5" class="table-message">Cargando recordatorios…</td></tr>
+                        </tbody>
+                    </table>
+                </section>
 
-                    <div class="form-actions">
-                        <button type="button" class="btn-secondary" style="margin-right: auto; color: #1e8e3e; border-color: #1e8e3e;">Promesa de Pago (Registrar manual)</button>
-                        <a href="cuentas-por-cobrar.html" class="btn-secondary" style="text-decoration: none;">Cancelar</a>
-                        <button type="submit" class="btn-primary">✉️ Enviar Recordatorio</button>
+                <section class="card table-card">
+                    <div class="table-card-header">
+                        <div>
+                            <h3>Promesas de pago</h3>
+                            <p>Compromisos acordados con los clientes.</p>
+                        </div>
                     </div>
-                </form>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>FACTURA</th>
+                                <th>CLIENTE</th>
+                                <th>FECHA</th>
+                                <th>MONTO</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promesasTableBody">
+                            <tr><td colspan="6" class="table-message">Cargando promesas…</td></tr>
+                        </tbody>
+                    </table>
+                </section>
             </div>
         </main>
     </div>
-    <script src="../../JS/sidebar.js"></script>
+
+    <script type="module" src="../../dist/main.js"></script>
 </body>
 </html>

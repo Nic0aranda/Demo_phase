@@ -2,6 +2,7 @@ package com.phase.api.security;
 
 import tools.jackson.databind.ObjectMapper;
 import com.phase.api.common.ApiError;
+import com.phase.api.common.RequestIdFilter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,9 +35,14 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
                 "SIN_PERMISO",
                 "No tienes permisos para esta operacion",
                 request.getRequestURI(),
-                UUID.randomUUID().toString(),
+                requestId(request),
                 null
         );
         objectMapper.writeValue(response.getOutputStream(), error);
+    }
+
+    private String requestId(HttpServletRequest request) {
+        Object requestId = request.getAttribute(RequestIdFilter.ATTRIBUTE);
+        return requestId == null ? UUID.randomUUID().toString() : String.valueOf(requestId);
     }
 }

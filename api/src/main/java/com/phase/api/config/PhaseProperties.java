@@ -8,8 +8,8 @@ import java.time.Duration;
 public class PhaseProperties {
 
     private String baseUrl = "http://127.0.0.1:8484";
-    private String username = "admin";
-    private String password = "admin123";
+    private String username;
+    private String password;
     private Duration connectTimeout = Duration.ofSeconds(3);
     private Duration readTimeout = Duration.ofSeconds(15);
 
