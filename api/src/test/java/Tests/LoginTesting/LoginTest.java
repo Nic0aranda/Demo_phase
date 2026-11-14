@@ -12,6 +12,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import Tests.LoginTesting.LoginHelper;
+
 public class LoginTest {
 
     @Test
@@ -72,5 +74,50 @@ public class LoginTest {
             driver.quit();
 
         }
+
     }
+
+    @Test
+    public void ValidarBotonInicioSesion(){
+
+        WebDriver driver = new ChromeDriver();
+
+        try {
+
+
+            driver.get("http://localhost:5500/Index.html");
+
+            WebElement botonLogin = driver.findElement(
+                    By.xpath("/html/body/div/div[2]/form/button")
+            );
+
+            botonLogin.click();
+
+            WebDriverWait wait = new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(10)
+            );
+
+            boolean sigueEnIndex = wait.until(
+                    ExpectedConditions.urlContains("Index")
+            );
+
+            assertTrue(
+                    sigueEnIndex,
+                    "No se pudo acceder al Dashboard"
+            );
+
+        } finally {
+
+            driver.quit();
+
+        }
+
+
+
+
+
+    }
+
+
 }
