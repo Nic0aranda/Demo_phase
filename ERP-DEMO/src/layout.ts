@@ -24,12 +24,25 @@ interface MenuItem {
   key: string;
   label: string;
   file: string;
-  section: 'dashboard' | 'admin' | 'compartidas';
+  section: 'dashboard' | 'admin' | 'compartidas' | 'auditoria';
   roles?: Rol[];
 }
 
 const MENU: MenuItem[] = [
-  { key: 'dashboard', label: 'Panel principal', file: 'dashboard.html', section: 'dashboard' },
+  {
+    key: 'dashboard',
+    label: 'Panel principal',
+    file: 'dashboard.html',
+    section: 'dashboard',
+    roles: ['admin', 'comercial', 'operaciones', 'contabilidad', 'auditor']
+  },
+  {
+    key: 'auditoria',
+    label: 'Auditoría temporal',
+    file: 'auditoria.html',
+    section: 'auditoria',
+    roles: ['admin', 'auditor']
+  },
   { key: 'clientes', label: 'Clientes', file: 'clientes.html', section: 'compartidas' },
   {
     key: 'presupuestos',
@@ -57,7 +70,7 @@ const MENU: MenuItem[] = [
     label: 'Gestión de usuarios',
     file: 'users.html',
     section: 'admin',
-    roles: ['admin']
+    roles: ['admin', 'auditor']
   }
 ];
 
@@ -77,7 +90,8 @@ const PAGE_TO_MENU: Record<string, string> = {
   notas: 'notas',
   'crear-nota': 'notas',
   usuarios: 'usuarios',
-  'crear-usuario': 'usuarios'
+  'crear-usuario': 'usuarios',
+  auditoria: 'auditoria'
 };
 
 function currentSection(): string | null {
@@ -94,7 +108,10 @@ function viewHref(section: string, file: string): string {
 }
 
 function roleSection(rol: string): string {
-  return ['admin', 'comercial', 'operaciones', 'contabilidad'].includes(rol) ? rol : 'admin';
+  if (rol === 'auditor') return 'admin';
+  return ['admin', 'comercial', 'operaciones', 'contabilidad'].includes(rol)
+    ? rol
+    : 'admin';
 }
 
 function dashboardHref(rol: string): string {
@@ -121,13 +138,21 @@ function renderSidebar(user: Usuario): void {
   if (!sidebar) return;
 
   const activeKey = activeMenuKey();
-  const visible = MENU.filter((item) => !item.roles || item.roles.includes(user.rol));
+  const visible = MENU.filter((item) => {
+    return !item.roles || item.roles.includes(user.rol);
+  });
   const name = fullName(user);
 
   sidebar.innerHTML = `
     <div class="sidebar-header">
       <div class="logo">
-        <span class="logo-icon">N</span>
+        <span class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+          </svg>
+        </span>
         <div class="logo-text">
           <strong>ERP EMPRESARIAL</strong>
           <span>Portal de empresa</span>
@@ -313,6 +338,7 @@ export async function initLayout(): Promise<Usuario> {
     .split(',')
     .map((role) => role.trim())
     .filter(Boolean) as Rol[];
+
   if (requiredRoles.length > 0 && !requiredRoles.includes(user.rol)) {
     flash('No tienes permisos para acceder a esa sección.', 'error');
     location.replace(dashboardHref(user.rol));

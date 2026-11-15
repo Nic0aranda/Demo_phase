@@ -48,6 +48,7 @@ export function fullName(user: Usuario): string {
 }
 
 export function roleDashboard(rol: Rol | string): string {
+  if (String(rol) === 'auditor') return 'views/admin/dashboard.html';
   const safeRole = ['admin', 'comercial', 'operaciones', 'contabilidad'].includes(String(rol))
     ? String(rol)
     : 'admin';

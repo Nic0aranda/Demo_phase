@@ -1,71 +1,76 @@
-/* css/login.css */
+/* css/login.css - Enterprise Login Screen */
 
 .login-container {
     display: flex;
     background-color: var(--white);
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    width: 900px;
-    max-width: 95%;
-    min-height: 500px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    width: 880px;
+    max-width: 100%;
+    min-height: 480px;
     overflow: hidden;
 }
 
 /* Panel izquierdo (Branding) */
 .login-branding {
     flex: 1;
-    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--gradient-purple) 100%);
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     color: var(--white);
-    padding: 40px;
+    padding: 48px 36px;
     text-align: center;
+    position: relative;
 }
 
 .login-branding h2 {
-    font-size: 28px;
-    margin-bottom: 15px;
-    letter-spacing: 1px;
+    font-size: 26px;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
     font-weight: 700;
 }
 
 .login-branding p {
-    font-size: 16px;
-    opacity: 0.95;
-    line-height: 1.5;
+    font-size: 14.5px;
+    opacity: 0.92;
+    line-height: 1.55;
+    max-width: 320px;
 }
 
 /* Panel derecho (Formulario) */
 .login-form-section {
     flex: 1;
-    padding: 50px 45px;
+    padding: 48px 44px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    background: var(--white);
 }
 
 .login-form-section h1 {
-    font-size: 26px;
-    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
     color: var(--text-main);
 }
 
 .login-form-section .subtitle {
     color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 35px;
+    font-size: 13.5px;
+    margin-bottom: 28px;
 }
 
 /* Elementos del formulario */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .form-group label {
     display: block;
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--text-main);
     margin-bottom: 6px;
     font-weight: 600;
@@ -75,7 +80,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 24px;
     font-size: 13px;
 }
 
@@ -98,7 +103,7 @@
     color: var(--primary-purple);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s;
+    transition: color 0.15s;
 }
 
 .forgot-password:hover {
@@ -112,17 +117,27 @@
     background-color: var(--primary-purple);
     color: var(--white);
     border: none;
-    padding: 12px;
+    padding: 11px 16px;
     border-radius: 6px;
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-bottom: 20px;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 3px rgba(109, 74, 255, 0.25);
 }
 
 .btn-login:hover {
     background-color: var(--dark-purple);
+}
+
+.btn-login:active {
+    transform: translateY(1px);
+}
+
+.btn-login:disabled {
+    opacity: 0.65;
+    cursor: wait;
 }
 
 /* Aviso de seguridad */
@@ -133,7 +148,12 @@
     gap: 8px;
     font-size: 12px;
     color: var(--text-muted);
-    margin-top: 10px;
+    margin-top: 8px;
+}
+
+.security-notice svg {
+    color: var(--text-muted);
+    flex-shrink: 0;
 }
 
 /* Adaptabilidad para móviles y tablets */
@@ -143,11 +163,11 @@
     }
     
     .login-branding {
-        padding: 40px 20px;
-        min-height: 220px;
+        padding: 36px 20px;
+        min-height: 180px;
     }
     
     .login-form-section {
-        padding: 40px 25px;
+        padding: 32px 24px;
     }
 }

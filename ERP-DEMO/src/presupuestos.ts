@@ -1,5 +1,5 @@
 import { api, ApiError } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import { setCurrency } from './storage.js';
 import {
   $,
@@ -91,6 +91,10 @@ function acciones(presupuesto: Presupuesto): string {
   const parts = [
     `<button type="button" class="btn-action" data-view-presupuesto="${id}">Ver</button>`
   ];
+  const auditBtn = auditButton('PRESUPUESTOS', presupuesto.id);
+  if (auditBtn) {
+    parts.push(auditBtn);
+  }
   if (!canManagePresupuestos()) return parts.join(' ');
 
   if (['BORRADOR', 'ENVIADO', 'RECHAZADO'].includes(estado)) {
@@ -366,7 +370,7 @@ export async function initPresupuestoForm(): Promise<void> {
   if (isEdit) {
     if (title) title.textContent = 'Editar presupuesto';
     if (subtitle) subtitle.textContent = 'Actualiza los conceptos y el estado del presupuesto.';
-    if (submitButton) submitButton.textContent = '✓ Guardar cambios';
+    if (submitButton) submitButton.textContent = 'Guardar cambios';
     const breadcrumb = $('#presupuestoFormBreadcrumb');
     if (breadcrumb) breadcrumb.textContent = `Editar ${editId}`;
   }

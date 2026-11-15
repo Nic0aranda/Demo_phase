@@ -12,6 +12,14 @@ public interface PhaseClient {
 
     String read(String global, String key);
 
+    String readAt(String global, String key, long transaction);
+
+    long latestChanged(String global, String key, long transaction);
+
+    String currentTransaction();
+
+    String transactionTimestamp(long transaction);
+
     String readAll(String global);
 
     void writeJson(String global, String key, String json, boolean replace);

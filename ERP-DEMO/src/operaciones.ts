@@ -1,5 +1,5 @@
 import { api, ApiError } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import {
   $,
   closeModal,
@@ -96,8 +96,8 @@ function hasDocumento(operacion: Operacion, kinds: string[]): boolean {
 
 function documentIcon(operacion: Operacion, kinds: string[]): string {
   return hasDocumento(operacion, kinds)
-    ? '<span class="check-icon">☑️</span>'
-    : '<span class="cross-icon">❌</span>';
+    ? '<span class="doc-indicator ok" title="Registrado"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>'
+    : '<span class="doc-indicator missing" title="Pendiente"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span>';
 }
 
 function renderTabla(): void {
@@ -136,6 +136,7 @@ function renderTabla(): void {
                 ? `<button type="button" class="btn-action close-btn" data-close-op="${escapeHtml(operacion.id)}">Cerrar</button>`
                 : ''
             }
+            ${auditButton('OPERACIONES', operacion.id)}
           </td>
         </tr>
       `;
@@ -167,7 +168,7 @@ function renderDocumentos(operacion: Operacion): void {
                 (documento) => `
                   <li>
                     <div class="doc-info">
-                      <span class="doc-icon">📄</span>
+                      <span class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
                       <span>
                         <strong>${escapeHtml(statusLabel(documento.tipo))}</strong>
                         <span class="sub-text">${escapeHtml(documento.numero)}${documento.fecha ? ` · ${escapeHtml(documento.fecha)}` : ''}</span>

@@ -78,7 +78,16 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll();
                     }
+                    auth.requestMatchers("/api/v1/auditoria/**").hasAnyRole("AUDITOR", "ADMIN");
+                    auth.requestMatchers(
+                            "/api/v1/auth/me",
+                            "/api/v1/auth/change-password"
+                    ).authenticated();
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/usuarios/**")
+                            .hasAnyRole("ADMIN", "AUDITOR");
                     auth.requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN");
+                    auth.requestMatchers("/api/v1/**")
+                            .hasAnyRole("ADMIN", "COMERCIAL", "OPERACIONES", "CONTABILIDAD", "AUDITOR");
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

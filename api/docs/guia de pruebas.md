@@ -97,12 +97,15 @@ Para probar otro rol, repite el login con otro usuario y reemplaza el token en *
 | Conciliación | Todos los roles | ADMIN, CONTABILIDAD |
 | Dashboard y PDF | Todos los roles | — |
 | Envío de factura por correo | — | ADMIN, CONTABILIDAD |
+| Auditoría temporal | Solo AUDITOR | — |
 
 Prueba de seguridad mínima:
 
 1. Sin token, `GET /api/v1/clientes` debe devolver **401**.
 2. Con token de `COMERCIAL`, `GET /api/v1/usuarios` debe devolver **403**.
 3. Con token de `COMERCIAL`, `POST /api/v1/pagos` debe devolver **403**.
+4. Con token de `AUDITOR`, `GET /api/v1/auditoria/transaccion-actual` debe devolver **200**.
+5. Con token de `AUDITOR`, `GET /api/v1/clientes` y `POST /api/v1/clientes` deben devolver **403**.
 
 ## 6. Orden sugerido de ejecución
 
@@ -936,3 +939,47 @@ principal sin restaurarla después.
 | Error `401` al crear un pago | El token expiró durante la edición | Vuelve a iniciar sesión y repite la operación |
 | El campo de saldo no aparece | No hay facturas vigentes | Emite o reactiva una factura y recarga la página |
 | Fecha de promesa rechazada | Formato distinto de `AAAA-MM-DD` | Usa el selector o escribe el formato indicado |
+
+## 13. Demostración de auditoría temporal
+
+La cuenta auditora se crea manualmente desde **Gestión de usuarios**. Elige el
+rol **Auditoría (solo lectura)** y no agregues permisos adicionales. La cuenta
+solo puede usar los endpoints de auditoría y cambiar su propia contraseña.
+
+### 13.1 Preparar un cambio
+
+1. Inicia sesión como `admin@empresa.com` y crea un cliente de prueba o elige
+   uno existente. Anota su RUT normalizado.
+2. Desde **Gestión de usuarios**, crea una cuenta de prueba con rol auditor.
+3. Inicia sesión con esa cuenta y anota la **Transacción actual en PhaseDB**
+   que muestra la página **Auditoría temporal**. Este número representa el
+   estado anterior al siguiente cambio.
+4. Cierra sesión, vuelve a entrar como administrador y modifica un dato del
+   cliente, por ejemplo su dirección. Guarda el cambio.
+5. Cierra sesión y vuelve a entrar con la cuenta auditora.
+
+### 13.2 Consultar el historial fechado
+
+1. En **Auditoría temporal**, selecciona **Clientes**, ingresa el RUT y pulsa
+   **Mostrar historial completo**. Deben aparecer los snapshots desde el más
+   reciente al más antiguo, cada uno identificado por su fecha UTC e ID de
+   transacción. Expande una versión para revisar el JSON completo.
+2. Prueba una factura, un pago y una nota de crédito usando sus claves. Cada
+   historial debe corresponder al global seleccionado y mostrar fechas para
+   cada cambio. Si una versión fue eliminada, debe indicarlo en su snapshot.
+3. Si hay más de 20 versiones, usa **Cargar versiones más antiguas** hasta
+   recorrer el historial completo.
+4. Como auditor, intenta abrir `GET /api/v1/clientes` y una operación de
+   escritura. Ambas deben responder **403**. La página de auditoría no debe
+   ofrecer navegación a otras áreas.
+5. Verifica que una entidad no permitida (por ejemplo, `USUARIOS`) se rechace
+   con **400**.
+
+La API también expone `GET /api/v1/auditoria/historial?entidad=CLIENTES&clave={rut}&limite=20`;
+la respuesta incluye snapshots ordenados del más reciente al más antiguo,
+`fecha` en ISO-8601 UTC para cada transacción y un cursor `siguienteAntesDe`
+cuando quedan versiones por cargar. PhaseDB obtiene cada fecha mediante
+`$WHEN(tx)`, por ejemplo `WRITE $WHEN($CHANGED(^CLIENTES("rut"))),!`.
+
+La interfaz limita la consulta a `CLIENTES`, `FACTURAS`, `PAGOS` y
+`NOTASCREDITO`; no acepta comandos Phase enviados por el usuario.

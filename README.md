@@ -34,6 +34,23 @@ admin@empresa.com / admin123
 comercial@empresa.com / comercial123
 ```
 
+## Demostración de auditoría temporal
+
+La demo incluye el rol **Auditoría (solo lectura)**. Inicia sesión como
+`admin@empresa.com`, abre **Gestión de usuarios** y crea una cuenta nueva con
+ese rol. No le asignes permisos adicionales. Luego cierra la sesión e ingresa
+con la cuenta auditora.
+
+El auditor solo puede abrir **Auditoría temporal** y consultar registros de
+clientes, facturas, pagos y notas de crédito; no puede modificar datos, acceder
+a otras áreas del ERP ni consultar usuarios o globales internos. Selecciona la
+entidad e ingresa la clave del registro (por ejemplo, el RUT de un cliente o el
+ID de una factura); la página muestra sus cambios desde el más reciente hasta
+el más antiguo, con el snapshot completo y la fecha UTC de cada transacción.
+
+Consulta [`api/docs/guia de pruebas.md`](api/docs/guia%20de%20pruebas.md) para
+un recorrido que modifica un cliente y verifica su historial fechado.
+
 ## Instalación y arranque del frontend
 
 En otra terminal, desde la raíz del repositorio:

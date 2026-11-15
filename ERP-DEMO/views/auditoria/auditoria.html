@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoría temporal - ERP Empresarial</title>
+    <link rel="stylesheet" href="../../CSS/Main.css">
+    <link rel="stylesheet" href="../../CSS/layout.css">
+    <link rel="stylesheet" href="../../CSS/components.css">
+    <link rel="stylesheet" href="../../CSS/forms.css">
+</head>
+<body data-page="auditoria" data-require-role="auditor,admin">
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-titles">
+                    <span class="badge">TIPO DE CUENTA: AUDITORÍA</span>
+                    <h1>Auditoría temporal</h1>
+                    <p>Revisa el historial completo de cambios y la fecha de cada transacción.</p>
+                </div>
+            </header>
+
+            <section class="card form-card">
+                <div class="form-card-header audit-form-header">
+                    <div class="audit-status-strip">
+                        <span>Transacción actual: <strong id="transaccionActual" class="tx-num">Consultando…</strong></span>
+                    </div>
+                    <span class="sub-text">Consulta histórica inmutable con reconstrucción de snapshots</span>
+                </div>
+                <form id="auditoriaForm" class="form-card-body" novalidate>
+                    <div class="form-section">
+                        <div class="form-section-info">
+                            <h3>Global que deseas revisar</h3>
+                            <p>Selecciona la entidad global de negocio para auditar su evolución temporal.</p>
+                        </div>
+                        <div class="form-section-fields">
+                            <div class="grid-2-cols">
+                                <div class="form-group">
+                                    <label for="auditoriaEntidad">Global de negocio <span class="required">*</span></label>
+                                    <select id="auditoriaEntidad" required>
+                                        <option value="CLIENTES">Clientes (CLIENTES)</option>
+                                        <option value="FACTURAS">Facturas / Cartera (FACTURAS)</option>
+                                        <option value="PRESUPUESTOS">Presupuestos (PRESUPUESTOS)</option>
+                                        <option value="OPERACIONES">Operaciones (OPERACIONES)</option>
+                                        <option value="PAGOS">Pagos (PAGOS)</option>
+                                        <option value="NOTASCREDITO">Notas de crédito (NOTASCREDITO)</option>
+                                        <option value="CONCILIACION">Conciliación bancaria (CONCILIACION)</option>
+                                        <option value="COBRANZA">Cobranza / Recordatorios (COBRANZA)</option>
+                                        <option value="PROMESAS">Promesas de pago (PROMESAS)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="auditoriaClave">Clave del registro <span class="required">*</span></label>
+                                    <input type="text" id="auditoriaClave" maxlength="120" required
+                                        placeholder="Ej. RUT del cliente (76123456-7)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-form-alert hidden></div>
+                    <div class="form-actions">
+                        <button type="submit" id="auditoriaConsultar" class="btn-primary">Mostrar historial completo</button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="auditoriaHistorialPanel" class="card table-card mt-20 audit-panel" hidden>
+                <div class="audit-table-header">
+                    <div class="audit-header-main">
+                        <div class="audit-title-wrapper">
+                            <h2>Historial completo de cambios</h2>
+                            <div id="auditoriaBadges" class="audit-header-badges"></div>
+                        </div>
+                        <p id="auditoriaMetadata" class="sub-text"></p>
+                    </div>
+                    <div class="audit-header-controls">
+                        <div class="audit-search-box">
+                            <input type="search" id="auditSearchInput" placeholder="Filtrar por campo o valor…" aria-label="Filtrar cambios">
+                        </div>
+                        <button type="button" id="toggleAllSnapshotsBtn" class="btn-secondary" title="Expandir o colapsar todas las versiones">
+                            Expandir todos
+                        </button>
+                        <button type="button" id="auditoriaHistorialBtn" class="btn-secondary" hidden>
+                            Cargar versiones anteriores
+                        </button>
+                    </div>
+                </div>
+
+                <div class="audit-table-container">
+                    <table class="data-table audit-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">TRANSACCIÓN</th>
+                                <th style="width: 195px;">FECHA Y HORA (UTC)</th>
+                                <th style="width: 130px;">TIPO / ESTADO</th>
+                                <th>RESUMEN Y CAMPOS MODIFICADOS</th>
+                                <th style="width: 130px; text-align: right;">DETALLES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditoriaHistorial">
+                            <!-- Filas generadas dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module" src="../../dist/main.js"></script>
+</body>
+</html>

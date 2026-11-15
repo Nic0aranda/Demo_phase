@@ -1,5 +1,5 @@
 import { api, ApiError } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, canAudit, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import {
   $,
   confirmAction,
@@ -96,8 +96,10 @@ function renderTabla(): void {
                      data-toggle-cliente="${escapeHtml(cliente.numDoc)}"
                      data-activo="${cliente.activo}"
                    >${cliente.activo ? 'Desactivar' : 'Activar'}</button>`
-                : '<span class="sub-text">—</span>'
+                : ''
             }
+            ${auditButton('CLIENTES', cliente.numDoc)}
+            ${!canManage && !canAudit() ? '<span class="sub-text">—</span>' : ''}
           </td>
         </tr>
       `
@@ -197,7 +199,7 @@ export async function initClienteForm(): Promise<void> {
   if (editDoc) {
     title!.textContent = 'Editar cliente';
     subtitle!.textContent = 'Actualiza los datos de la empresa y sus canales de contacto.';
-    if (submitButton) submitButton.textContent = '✓ Guardar cambios';
+    if (submitButton) submitButton.textContent = 'Guardar cambios';
     try {
       currentCliente = await api.cliente(editDoc);
       fillForm(currentCliente);

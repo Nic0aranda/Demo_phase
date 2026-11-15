@@ -1,4 +1,5 @@
 import { api, ApiError } from './api.js';
+import { auditButton, canAudit } from './permissions.js';
 import { getCurrency, getUser, setCurrency } from './storage.js';
 import {
   $,
@@ -24,7 +25,8 @@ function subtitleFor(rol: Rol): string {
     admin: 'Visión global de la organización y sus operaciones.',
     comercial: 'Seguimiento comercial de clientes, presupuestos y oportunidades.',
     operaciones: 'Estado logístico de las operaciones y su documentación.',
-    contabilidad: 'Facturación, cobranza y conciliación financiera.'
+    contabilidad: 'Facturación, cobranza y conciliación financiera.',
+    auditor: 'Consulta de solo lectura de versiones históricas.'
   };
   return subtitles[rol] || subtitles.admin;
 }
@@ -45,7 +47,12 @@ function actionsFor(user: Usuario): string {
     links.push(`<a href="${shared('crear-factura.html')}" class="btn-secondary">+ Nueva factura</a>`);
   }
   if (user.rol === 'admin') {
+    links.push('<a href="../auditoria/auditoria.html" class="btn-secondary">Auditoría temporal</a>');
     links.push('<a href="users.html" class="btn-secondary">Gestionar usuarios</a>');
+  }
+  if (user.rol === 'auditor') {
+    links.push('<a href="../auditoria/auditoria.html" class="btn-primary">Auditoría temporal</a>');
+    links.push('<a href="users.html" class="btn-secondary">Ver usuarios</a>');
   }
   return links.join('');
 }
@@ -217,6 +224,8 @@ function systemWidget(data: Dashboard): string {
 
 function recentCartera(cartera: CuentaPorCobrar[], currency: string): string {
   const rows = cartera.slice(0, 5);
+  const auditor = canAudit();
+  const totalCols = auditor ? 6 : 5;
   return `
     <div class="card table-card dashboard-table">
       <div class="table-card-header">
@@ -234,12 +243,13 @@ function recentCartera(cartera: CuentaPorCobrar[], currency: string): string {
             <th>VENCIMIENTO</th>
             <th>PENDIENTE</th>
             <th>ESTADO</th>
+            ${auditor ? '<th>ACCIONES</th>' : ''}
           </tr>
         </thead>
         <tbody>
           ${
             rows.length === 0
-              ? emptyRow(5, 'No hay cuentas por cobrar registradas.')
+              ? emptyRow(totalCols, 'No hay cuentas por cobrar registradas.')
               : rows
                   .map(
                     (cuenta) => `
@@ -249,6 +259,7 @@ function recentCartera(cartera: CuentaPorCobrar[], currency: string): string {
                         <td>${escapeHtml(cuenta.fechaVencimiento || '—')}</td>
                         <td><strong>${escapeHtml(money(cuenta.montoPendiente, currency))}</strong></td>
                         <td>${statusBadge(cuenta.estado)}</td>
+                        ${auditor ? `<td class="table-actions">${auditButton('FACTURAS', cuenta.facturaId)}</td>` : ''}
                       </tr>
                     `
                   )

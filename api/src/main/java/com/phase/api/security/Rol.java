@@ -9,7 +9,8 @@ public enum Rol {
     ADMIN,
     COMERCIAL,
     OPERACIONES,
-    CONTABILIDAD;
+    CONTABILIDAD,
+    AUDITOR;
 
     @JsonCreator
     public static Rol from(String value) {

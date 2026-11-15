@@ -1,5 +1,5 @@
 import { api, ApiError } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, canAudit, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import { getUser, setCurrency } from './storage.js';
 import {
   $,
@@ -105,8 +105,10 @@ function renderTabla(): void {
             ${
               vigente && canManage
                 ? `<button type="button" class="btn-action btn-action-danger" data-anular-nota="${escapeHtml(nota.id)}">Anular</button>`
-                : '<span class="sub-text">—</span>'
+                : ''
             }
+            ${auditButton('NOTASCREDITO', nota.id)}
+            ${(!vigente || !canManage) && !canAudit() ? '<span class="sub-text">—</span>' : ''}
           </td>
         </tr>
       `;

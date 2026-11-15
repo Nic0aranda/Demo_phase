@@ -2,11 +2,13 @@ import { API_BASE } from './config.js';
 import { clearSession, getToken } from './storage.js';
 import type {
   ApiErrorBody,
+  AuditoriaHistorial,
   CambioPasswordPayload,
   Cliente,
   ClientePayload,
   CuentaPorCobrar,
   Dashboard,
+  EstadoTemporal,
   Factura,
   FacturaPayload,
   LoginResponse,
@@ -169,6 +171,21 @@ export const api = {
 
   dashboard(): Promise<Dashboard> {
     return request<Dashboard>('/dashboard');
+  },
+
+  transaccionAuditoria(): Promise<EstadoTemporal> {
+    return request<EstadoTemporal>('/auditoria/transaccion-actual');
+  },
+
+  auditoriaHistorial(
+    entidad: string,
+    clave: string,
+    antesDe?: number,
+    limite = 20
+  ): Promise<AuditoriaHistorial> {
+    return request<AuditoriaHistorial>(
+      `/auditoria/historial${query({ entidad, clave, antesDe, limite })}`
+    );
   },
 
   clientes(q = '', page = 0, size = 100, activo?: boolean): Promise<PageResponse<Cliente>> {

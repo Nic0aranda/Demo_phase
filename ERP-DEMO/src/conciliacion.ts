@@ -1,5 +1,5 @@
 import { api } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, canAudit, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import { getUser, setCurrency } from './storage.js';
 import {
   $,
@@ -79,8 +79,10 @@ function renderTabla(): void {
             ${
               !conciliado && manage
                 ? `<button type="button" class="btn-action btn-action-ok" data-conciliar="${escapeHtml(movimiento.id)}">Conciliar</button>`
-                : '<span class="sub-text">—</span>'
+                : ''
             }
+            ${auditButton('CONCILIACION', movimiento.id)}
+            ${(conciliado || !manage) && !canAudit() ? '<span class="sub-text">—</span>' : ''}
           </td>
         </tr>
       `;

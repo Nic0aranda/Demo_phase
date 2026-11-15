@@ -1,5 +1,5 @@
 import { api } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, canAudit, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import { getUser, setCurrency } from './storage.js';
 import {
   $,
@@ -160,8 +160,10 @@ function renderCartera(): void {
               manage
                 ? `<button type="button" class="btn-action" data-recordar="${escapeHtml(cuenta.facturaId)}">Recordatorio</button>
                    <button type="button" class="btn-action btn-action-ok" data-promesa="${escapeHtml(cuenta.facturaId)}">Promesa</button>`
-                : '<span class="sub-text">—</span>'
+                : ''
             }
+            ${auditButton('FACTURAS', cuenta.facturaId)}
+            ${!manage && !canAudit() ? '<span class="sub-text">—</span>' : ''}
           </td>
         </tr>
       `
@@ -173,7 +175,7 @@ function renderRecordatorios(): void {
   const tbody = $('#recordatoriosTableBody');
   if (!tbody) return;
   if (recordatorios.length === 0) {
-    tbody.innerHTML = emptyRow(5, 'Aún no se han enviado recordatorios.');
+    tbody.innerHTML = emptyRow(6, 'Aún no se han enviado recordatorios.');
     return;
   }
   tbody.innerHTML = recordatorios
@@ -187,6 +189,9 @@ function renderRecordatorios(): void {
           <td>${escapeHtml(recordatorio.cliente || '—')}</td>
           <td>${escapeHtml(recordatorio.canal || '—')}</td>
           <td>${statusBadge(recordatorio.estado)}</td>
+          <td class="table-actions">
+            ${auditButton('COBRANZA', recordatorio.id) || '<span class="sub-text">—</span>'}
+          </td>
         </tr>
       `
     )
@@ -217,8 +222,10 @@ function renderPromesas(): void {
               manage && (promesa.estado || '').toUpperCase() === 'PENDIENTE'
                 ? `<button type="button" class="btn-action btn-action-ok" data-promesa-estado="${escapeHtml(promesa.id)}" data-estado="CUMPLIDA">Cumplida</button>
                    <button type="button" class="btn-action btn-action-danger" data-promesa-estado="${escapeHtml(promesa.id)}" data-estado="INCUMPLIDA">Incumplida</button>`
-                : '<span class="sub-text">—</span>'
+                : ''
             }
+            ${auditButton('PROMESAS', promesa.id)}
+            ${(!manage || (promesa.estado || '').toUpperCase() !== 'PENDIENTE') && !canAudit() ? '<span class="sub-text">—</span>' : ''}
           </td>
         </tr>
       `

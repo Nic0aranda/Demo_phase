@@ -1,4 +1,4 @@
-export type Rol = 'admin' | 'comercial' | 'operaciones' | 'contabilidad';
+export type Rol = 'admin' | 'comercial' | 'operaciones' | 'contabilidad' | 'auditor';
 export type EstadoUsuario = 'activo' | 'inactivo';
 
 export interface Usuario {
@@ -287,4 +287,20 @@ export interface UsuarioPayload {
   permisos: string[];
   password?: string;
   passwordConfirm?: string;
+}
+
+export interface EstadoTemporal {
+  transaccionActual: string;
+}
+
+export interface AuditoriaHistorial {
+  entidad: string;
+  clave: string;
+  transaccionActual: string;
+  versiones: Array<{
+    transaccion: number;
+    fecha: string | null;
+    valor: unknown;
+  }>;
+  siguienteAntesDe: number | null;
 }

@@ -10,6 +10,7 @@ import { initCobranzaPage } from './cobranza.js';
 import { initNotasPage, initNotaForm } from './notas.js';
 import { initConciliacionPage } from './conciliacion.js';
 import { initUsuariosPage, initUsuarioForm } from './usuarios.js';
+import { initAuditoriaPage } from './auditoria.js';
 import { errorMessage, toast } from './ui.js';
 
 const page = document.body.dataset.page || '';
@@ -75,6 +76,9 @@ async function boot(): Promise<void> {
       break;
     case 'crear-usuario':
       await initUsuarioForm();
+      break;
+    case 'auditoria':
+      await initAuditoriaPage();
       break;
     default:
       break;

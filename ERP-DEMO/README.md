@@ -60,6 +60,7 @@ localStorage.removeItem('erp.apiBase'); // volver al valor por defecto
 | `src/notas.ts` | Notas de crédito y anulación |
 | `src/conciliacion.ts` | Simulación, ejecución y conciliación manual |
 | `src/usuarios.ts` | Listado, alta, edición y recálculo administrativo de facturas |
+| `src/auditoria.ts` | Consulta y recorrido de solo lectura de versiones históricas |
 
 ## Páginas
 
@@ -86,6 +87,7 @@ lo rellena con el menú y el perfil del usuario.
 | `views/compartidas/conciliacion-bancaria.html` | Conciliación |
 | `views/admin/users.html` | Usuarios y recálculo de estados (solo admin) |
 | `views/admin/crear-usuario.html` | Alta/edición de usuario (`?email=...`) |
+| `views/auditoria/auditoria.html` | Comparación de valores actuales e históricos (solo auditor) |
 
 ## Acciones transversales
 
@@ -104,5 +106,7 @@ lo rellena con el menú y el perfil del usuario.
 - Los pagos y notas usan `Idempotency-Key` generada automáticamente.
 - Los presupuestos usan estados `BORRADOR`, `ENVIADO`, `APROBADO` y `RECHAZADO`;
   solo `admin` y `comercial` pueden escribir.
+- El rol `auditor` solo accede a la auditoría temporal de clientes, facturas,
+  pagos y notas de crédito, sin permisos de escritura.
 - La guía manual de pruebas, incluida la sección del frontend, está en
   `../api/docs/guia de pruebas.md`.

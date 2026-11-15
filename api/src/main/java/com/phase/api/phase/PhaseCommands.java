@@ -18,11 +18,19 @@ public final class PhaseCommands {
     private PhaseCommands() {
     }
 
-    public static String global(String name) {
-        if (name == null || !GLOBAL_NAME.matcher(name).matches()) {
+    public static String globalName(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Nombre de global Phase invalido: null");
+        }
+        String clean = name.startsWith("^") ? name.substring(1) : name;
+        if (!GLOBAL_NAME.matcher(clean).matches()) {
             throw new IllegalArgumentException("Nombre de global Phase invalido: " + name);
         }
-        return "^" + name;
+        return clean;
+    }
+
+    public static String global(String name) {
+        return "^" + globalName(name);
     }
 
     public static String quote(String value) {
@@ -41,6 +49,33 @@ public final class PhaseCommands {
 
     public static String readJson(String global, String key) {
         return "ZWRITE " + global(global) + "(" + subscript(key) + ")";
+    }
+
+    public static String readJsonAt(String global, String key, long transaction) {
+        if (transaction < 0) {
+            throw new IllegalArgumentException("La transaccion debe ser un numero absoluto no negativo");
+        }
+        String target = global(global);
+        return "DO WITH @TX(" + transaction + ") @BIND(" + target + ")\n. ZWRITE "
+                + target + "(" + subscript(key) + ")";
+    }
+
+    public static String latestChanged(String global, String key, long transaction) {
+        if (transaction < 0) {
+            throw new IllegalArgumentException("La transaccion debe ser un numero absoluto no negativo");
+        }
+        return "WRITE $CHANGED(^[" + transaction + "]" + globalName(global) + "(" + subscript(key) + ")),!";
+    }
+
+    public static String currentTransaction() {
+        return "WRITE $TX,!";
+    }
+
+    public static String transactionTimestamp(long transaction) {
+        if (transaction < 0) {
+            throw new IllegalArgumentException("La transaccion debe ser un numero absoluto no negativo");
+        }
+        return "WRITE $WHEN(" + transaction + "),!";
     }
 
     public static String readAll(String global) {

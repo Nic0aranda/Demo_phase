@@ -24,7 +24,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/usuarios")
-@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Usuarios", description = "Gestion de usuarios y roles del ERP")
 @SecurityRequirement(name = "bearerAuth")
 public class UsuarioController {
@@ -36,6 +35,7 @@ public class UsuarioController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITOR')")
     public ResponseEntity<PageResponse<UsuarioDTO>> listar(
             @RequestParam(defaultValue = "") String q,
             @RequestParam(required = false) Rol rol,
@@ -48,35 +48,41 @@ public class UsuarioController {
     }
 
     @GetMapping("/{email}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITOR')")
     public ResponseEntity<UsuarioDTO> obtener(@PathVariable String email) {
         return ResponseEntity.ok(usuarioService.obtener(email));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioDTO> crear(@Valid @RequestBody UsuarioDTO dto) {
         UsuarioDTO creado = usuarioService.crear(dto);
         return ResponseEntity.created(URI.create("/api/v1/usuarios/" + creado.getEmail())).body(creado);
     }
 
     @PutMapping("/{email}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioDTO> actualizar(@PathVariable String email,
                                                  @Valid @RequestBody UsuarioDTO dto) {
         return ResponseEntity.ok(usuarioService.actualizar(email, dto));
     }
 
     @PatchMapping("/{email}/estado")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioDTO> cambiarEstado(@PathVariable String email,
                                                     @RequestBody EstadoRequest request) {
         return ResponseEntity.ok(usuarioService.cambiarEstado(email, request.estado()));
     }
 
     @PatchMapping("/{email}/permisos")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioDTO> cambiarPermisos(@PathVariable String email,
                                                       @RequestBody PermisosRequest request) {
         return ResponseEntity.ok(usuarioService.cambiarPermisos(email, request.permisos()));
     }
 
     @DeleteMapping("/{email}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> eliminar(@PathVariable String email) {
         usuarioService.eliminar(email);
         return ResponseEntity.noContent().build();

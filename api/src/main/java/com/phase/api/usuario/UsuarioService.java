@@ -100,7 +100,7 @@ public class UsuarioService {
         record.setApellidos(dto.getApellidos().trim());
         record.setRol(dto.getRol() == null ? Rol.COMERCIAL : dto.getRol());
         record.setEstado(dto.getEstado() == null ? EstadoUsuario.ACTIVO : dto.getEstado());
-        record.setPermisos(normalizarPermisos(dto.getPermisos()));
+        record.setPermisos(normalizarPermisos(dto.getPermisos(), record.getRol()));
         record.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
 
         guardar(record);
@@ -129,8 +129,8 @@ public class UsuarioService {
         if (dto.getEstado() != null) {
             record.setEstado(dto.getEstado());
         }
-        if (dto.getPermisos() != null) {
-            record.setPermisos(normalizarPermisos(dto.getPermisos()));
+        if (dto.getPermisos() != null || record.getRol() == Rol.AUDITOR) {
+            record.setPermisos(normalizarPermisos(dto.getPermisos(), record.getRol()));
         }
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             validarPassword(dto.getPassword(), dto.getPasswordConfirm());
@@ -159,7 +159,7 @@ public class UsuarioService {
         if (record == null) {
             throw ApiException.notFound("Usuario no encontrado: " + email);
         }
-        record.setPermisos(normalizarPermisos(permisos));
+        record.setPermisos(normalizarPermisos(permisos, record.getRol()));
         guardar(record);
         return UsuarioDTO.from(record);
     }
@@ -239,7 +239,10 @@ public class UsuarioService {
         }
     }
 
-    private List<String> normalizarPermisos(List<String> permisos) {
+    private List<String> normalizarPermisos(List<String> permisos, Rol rol) {
+        if (rol == Rol.AUDITOR) {
+            return List.of();
+        }
         if (permisos == null) {
             return new ArrayList<>();
         }

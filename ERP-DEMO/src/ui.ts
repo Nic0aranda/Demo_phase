@@ -38,7 +38,8 @@ export function roleLabel(rol: string): string {
     admin: 'Administrador',
     comercial: 'Área Comercial',
     operaciones: 'Área Operativa',
-    contabilidad: 'Contabilidad y Finanzas'
+    contabilidad: 'Contabilidad y Finanzas',
+    auditor: 'Auditoría (solo lectura)'
   };
   return labels[rol] || rol;
 }

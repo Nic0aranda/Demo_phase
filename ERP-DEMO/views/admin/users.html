@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../CSS/layout.css">
     <link rel="stylesheet" href="../../CSS/components.css">
 </head>
-<body data-page="usuarios" data-require-role="admin">
+<body data-page="usuarios" data-require-role="admin,auditor">
 
     <div class="app-container">
         <aside class="sidebar"></aside>
@@ -31,14 +31,15 @@
                         <option value="comercial">Comercial</option>
                         <option value="operaciones">Operaciones</option>
                         <option value="contabilidad">Contabilidad</option>
+                        <option value="auditor">Auditoría</option>
                     </select>
                     <select id="usuarioEstado" aria-label="Filtrar por estado" style="width:140px;">
                         <option value="">Todos los estados</option>
                         <option value="activo">Activo</option>
                         <option value="inactivo">Inactivo</option>
                     </select>
-                    <button type="button" id="recalcularBtn" class="btn-secondary">Recalcular estados</button>
-                    <a href="crear-usuario.html" class="btn-primary">+ Nuevo usuario</a>
+                    <button type="button" id="recalcularBtn" class="btn-secondary" data-write-roles="admin">Recalcular estados</button>
+                    <a href="crear-usuario.html" class="btn-primary" data-write-roles="admin">+ Nuevo usuario</a>
                 </div>
             </header>
 

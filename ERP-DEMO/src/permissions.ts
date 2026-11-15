@@ -20,3 +20,20 @@ export function hasAnyRole(
 ): boolean {
   return Boolean(user && roles.includes(user.rol));
 }
+
+export function isAuditor(user = getUser()): boolean {
+  return Boolean(user && user.rol === 'auditor');
+}
+
+export function canAudit(user = getUser()): boolean {
+  return Boolean(user && (user.rol === 'auditor' || user.rol === 'admin'));
+}
+
+export function auditButton(entidad: string, clave: string | number | null | undefined): string {
+  if (!canAudit()) return '';
+  const keyStr = String(clave ?? '').trim();
+  if (!keyStr) return '';
+  const href = `../auditoria/auditoria.html?entidad=${encodeURIComponent(entidad)}&clave=${encodeURIComponent(keyStr)}`;
+  return `<a class="btn-action btn-action-audit" href="${href}" title="Auditar historial en PhaseDB">Auditar</a>`;
+}
+

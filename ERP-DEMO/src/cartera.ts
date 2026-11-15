@@ -1,5 +1,5 @@
 import { api } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import { setCurrency } from './storage.js';
 import {
   $,
@@ -110,6 +110,7 @@ function renderTabla(): void {
                 : ''
             }
             <a class="btn-action" href="gestion-cobranza.html?factura=${encodeURIComponent(cuenta.facturaId)}">Cobranza</a>
+            ${auditButton('FACTURAS', cuenta.facturaId)}
           </td>
         </tr>
       `;

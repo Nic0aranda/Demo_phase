@@ -144,8 +144,42 @@ public class HttpPhaseClient implements PhaseClient {
 
     @Override
     public String read(String global, String key) {
+        return readValue(PhaseCommands.readJson(global, key));
+    }
+
+    @Override
+    public String readAt(String global, String key, long transaction) {
+        return readValue(PhaseCommands.readJsonAt(global, key, transaction));
+    }
+
+    @Override
+    public String currentTransaction() {
+        return execute(PhaseCommands.currentTransaction()).trim();
+    }
+
+    @Override
+    public String transactionTimestamp(long transaction) {
+        String timestamp = execute(PhaseCommands.transactionTimestamp(transaction)).trim();
+        return timestamp.isEmpty() ? null : timestamp;
+    }
+
+    @Override
+    public long latestChanged(String global, String key, long transaction) {
+        String output = execute(PhaseCommands.latestChanged(global, key, transaction)).trim();
+        return parseTransaction(output);
+    }
+
+    private long parseTransaction(String value) {
         try {
-            return execute(PhaseCommands.readJson(global, key));
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            throw new PhaseException("TX_INVALIDA", "PhaseDB devolvio un numero de transaccion invalido", null, e);
+        }
+    }
+
+    private String readValue(String command) {
+        try {
+            return execute(command);
         } catch (PhaseException e) {
             if (isUndefined(e)) {
                 return null;

@@ -16,6 +16,7 @@ import {
   toast
 } from './ui.js';
 import { applyServerDetails, initValidation } from './validation.js';
+import { hasAnyRole, WRITE_ROLES } from './permissions.js';
 import type { ValidationRules } from './validation.js';
 import type { EstadoUsuario, Rol, Usuario, UsuarioPayload } from './types.js';
 
@@ -86,6 +87,8 @@ function renderTabla(): void {
     return;
   }
 
+  const canManage = hasAnyRole(WRITE_ROLES.usuarios);
+
   tbody.innerHTML = rows
     .map(
       (usuario) => `
@@ -110,13 +113,17 @@ function renderTabla(): void {
             }
           </td>
           <td class="table-actions">
-            <a class="btn-action" href="crear-usuario.html?email=${encodeURIComponent(usuario.email)}">Editar</a>
-            <button
-              type="button"
-              class="btn-action ${usuario.estado === 'activo' ? 'btn-action-danger' : 'btn-action-ok'}"
-              data-toggle-user="${escapeHtml(usuario.email)}"
-              data-estado="${escapeHtml(usuario.estado)}"
-            >${usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}</button>
+            ${
+              canManage
+                ? `<a class="btn-action" href="crear-usuario.html?email=${encodeURIComponent(usuario.email)}">Editar</a>
+                   <button
+                     type="button"
+                     class="btn-action ${usuario.estado === 'activo' ? 'btn-action-danger' : 'btn-action-ok'}"
+                     data-toggle-user="${escapeHtml(usuario.email)}"
+                     data-estado="${escapeHtml(usuario.estado)}"
+                   >${usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}</button>`
+                : '<span class="sub-text">—</span>'
+            }
           </td>
         </tr>
       `
@@ -233,6 +240,21 @@ export async function initUsuarioForm(): Promise<void> {
   // Los permisos se generan desde una sola fuente de datos para no repetir HTML.
   const permisosContainer = $('#permisosContainer');
   if (permisosContainer) renderPermisos(permisosContainer);
+  const roleSelect = $<HTMLSelectElement>('#rol');
+  const permisosSection = permisosContainer?.closest<HTMLElement>('.form-section');
+  const updatePermisosVisibility = () => {
+    const soloLectura = roleSelect?.value === 'auditor';
+    if (permisosSection) {
+      permisosSection.hidden = Boolean(soloLectura);
+      permisosSection.style.display = soloLectura ? 'none' : '';
+    }
+    if (soloLectura) {
+      $$<HTMLInputElement>('input[name="permisos"]').forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+    }
+  };
+  roleSelect?.addEventListener('change', updatePermisosVisibility);
 
   const params = new URLSearchParams(location.search);
   const editEmail = (params.get('email') || '').trim().toLowerCase();
@@ -246,7 +268,7 @@ export async function initUsuarioForm(): Promise<void> {
   if (isEdit) {
     if (title) title.textContent = 'Editar usuario';
     if (subtitle) subtitle.textContent = 'Actualiza el rol, estado y permisos de la cuenta.';
-    if (submitButton) submitButton.textContent = '✓ Guardar cambios';
+    if (submitButton) submitButton.textContent = 'Guardar cambios';
     if (passwordHelp) passwordHelp.textContent = 'Deja las contraseñas vacías para conservar la actual.';
     const email = $<HTMLInputElement>('#email');
     if (email) {
@@ -264,6 +286,7 @@ export async function initUsuarioForm(): Promise<void> {
   } else if (passwordHelp) {
     passwordHelp.textContent = 'La contraseña debe tener entre 8 y 72 caracteres.';
   }
+  updatePermisosVisibility();
 
   const rules: ValidationRules = {
     email: { label: 'El correo electrónico', required: true, email: true, maxLength: 120 },

@@ -1,5 +1,5 @@
 import { api, ApiError } from './api.js';
-import { hasAnyRole, WRITE_ROLES } from './permissions.js';
+import { auditButton, hasAnyRole, WRITE_ROLES } from './permissions.js';
 import { getUser, setCurrency } from './storage.js';
 import {
   $,
@@ -120,6 +120,7 @@ function renderTabla(): void {
             <button type="button" class="btn-action" data-invoice="${escapeHtml(factura.id)}">Ver detalle</button>
             <button type="button" class="btn-action" data-pdf="${escapeHtml(factura.id)}">PDF</button>
             ${pendiente && canPay ? `<button type="button" class="btn-action btn-action-ok" data-pay="${escapeHtml(factura.id)}">Registrar pago</button>` : ''}
+            ${auditButton('FACTURAS', factura.id)}
           </td>
         </tr>
       `;
