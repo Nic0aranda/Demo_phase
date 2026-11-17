@@ -24,8 +24,6 @@ public class NotasDeCreditoTest {
     // XPaths
     private static final String XPATH_TABLA = "//table[contains(@class,'data-table')]";
     private static final String XPATH_FILAS = "//tbody[@id='notasTableBody']/tr[not(contains(@class,'table-message'))]";
-    private static final String XPATH_CELDAS_TIPO = XPATH_FILAS + "/td[4]";
-    private static final String XPATH_CELDAS_ESTADO = XPATH_FILAS + "/td[8]";
 
 
     private void clickSeguro(WebDriver driver, WebDriverWait wait, By locator) {
@@ -128,8 +126,12 @@ public class NotasDeCreditoTest {
             Select selectFactura = new Select(driver.findElement(facturaSelectLocator));
             // Buscamos una opción que no esté vacía
             for (WebElement option : selectFactura.getOptions()) {
-                if (!option.getAttribute("value").isEmpty()) {
-                    selectFactura.selectByValue(option.getAttribute("value"));
+                String value = option.getAttribute("value");
+                assert value != null;
+                if (!value.isEmpty()) {
+                    String attribute = option.getAttribute("value");
+                    assert attribute != null;
+                    selectFactura.selectByValue(attribute);
                     System.out.println("Factura seleccionada: " + option.getText());
                     break;
                 }
