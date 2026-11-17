@@ -31,6 +31,7 @@ public class NotasDeCreditoTest {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", elemento);
         elemento.click();
     }
+    //NC-01
     @Test
     public void VisualizarTablaNotasCredito() {
         WebDriver driver = new ChromeDriver();
@@ -53,6 +54,7 @@ public class NotasDeCreditoTest {
             driver.quit();
         }
     }
+    
     @Test
     public void FiltrarNotasPorTipo() {
         WebDriver driver = new ChromeDriver();
