@@ -54,7 +54,7 @@ public class NotasDeCreditoTest {
             driver.quit();
         }
     }
-    
+
     @Test
     public void FiltrarNotasPorTipo() {
         WebDriver driver = new ChromeDriver();
