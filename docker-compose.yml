@@ -1,0 +1,102 @@
+services:
+  # ------------------------------------------------------------------
+  # PhaseDB - Haskell / Warp HTTP server over a PhaseDB database (.db)
+  # ------------------------------------------------------------------
+  phasedb-hs:
+    build:
+      context: .
+      dockerfile: phasedb/Dockerfile
+    container_name: phasedb-hs
+    hostname: phasedb-hs
+    volumes:
+      # Named volume keeps the database file across container restarts.
+      # To persist the DB on your host instead:
+      #   - $PWD/phase.db:/data/phase.db
+      - phasedb-data-seeded:/data
+    # The server reads its database relative to its working directory
+    # (default phase.db). Pin it to the mounted volume. Use --db, --listen
+    # (0.0.0.0 so other containers can reach it), and --port.
+    # Basic auth is plaintext in this local-only Compose network. Keep the
+    # host-published endpoint loopback-only; do not use this override in prod.
+    command:
+      - --db
+      - /data/phase.db
+      - --listen
+      - 0.0.0.0
+      - --port
+      - "8484"
+      - --allow-insecure-basic
+    ports:
+      - "127.0.0.1:8484:8484"
+  # ------------------------------------------------------------------
+  # phasedb-ui - React + Vite admin UI for PhaseDB (TypeScript)
+  # ------------------------------------------------------------------
+  phasedb-ui:
+    build:
+      context: .
+      dockerfile: phasedb/phasedb-ui/Dockerfile
+    container_name: phasedb-ui
+    hostname: phasedb-ui
+    ports:
+      - "5173:80"
+    depends_on:
+      phasedb-hs:
+        condition: service_healthy
+    #environment:
+      # The built UI is served by nginx on port 80. The app's API client
+      # defaults BASE to the same origin, so all /v1/* requests are
+      # proxied by nginx to the PhaseDB service (phasedb-hs:8484).
+      # If the browser rejects the /v1 call with a CORS error, uncomment
+      # the next line and set PHASEDB_CORS_ORIGIN to the UI's public URL:
+      #   - PHASEDB_CORS_ORIGIN=http://localhost:5173
+      # Then add "--cors-origin $PHASEDB_CORS_ORIGIN" to phasedb-hs'
+      # command above.
+
+  # ------------------------------------------------------------------
+  # Demo_phase/api - Spring Boot 4.x REST API over PhaseDB (Java 17 / Maven)
+  # ------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: erp-api
+    hostname: erp-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      phasedb-hs:
+        condition: service_healthy
+    environment:
+      - PORT=8080
+      - ERP_PHASE_URL=http://phasedb-hs:8484
+      # Match the bundled PhaseDB database for a fresh demo volume.
+      - ERP_PHASE_USER=${ERP_PHASE_USER:-admin}
+      - ERP_PHASE_PASSWORD=${ERP_PHASE_PASSWORD:-admin123}
+      # Mounted uploads dir (required by the API's file-upload feature).
+      - ERP_UPLOADS_DIR=/data/uploads
+    volumes:
+      - erp-uploads:/data/uploads
+
+  # ------------------------------------------------------------------
+  # Demo_phase/ERP-DEMO - TypeScript ERP frontend (vanilla TS, no bundler)
+  # ------------------------------------------------------------------
+  erp:
+    build:
+      context: .
+      dockerfile: ERP-DEMO/Dockerfile
+    container_name: erp-demo
+    hostname: erp-demo
+    ports:
+      - "5500:5500"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - PORT=5500
+      # This URL is used by the browser, not by the container; use the
+      # published host port instead of Compose-only DNS.
+      - ERP_API_BASE=http://localhost:8080/api/v1
+
+volumes:
+  phasedb-data-seeded:
+  erp-uploads:

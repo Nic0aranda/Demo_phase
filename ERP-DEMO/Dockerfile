@@ -19,17 +19,17 @@ FROM node:22-bookworm AS builder
 WORKDIR /app
 
 # package + lock first (fast rebuilds).
-COPY Demo_phase/ERP-DEMO/package.json Demo_phase/ERP-DEMO/package-lock.json ./
+COPY ERP-DEMO/package.json ERP-DEMO/package-lock.json ./
 RUN npm ci
 
 # Source + static assets not part of the tsc output.
-COPY Demo_phase/ERP-DEMO/src ./src
-COPY Demo_phase/ERP-DEMO/views ./views
-COPY Demo_phase/ERP-DEMO/CSS ./CSS
-COPY Demo_phase/ERP-DEMO/server.js ./
-COPY Demo_phase/ERP-DEMO/Index.html ./
-COPY Demo_phase/ERP-DEMO/docker-entrypoint.sh ./
-COPY Demo_phase/ERP-DEMO/tsconfig.json ./
+COPY ERP-DEMO/src ./src
+COPY ERP-DEMO/views ./views
+COPY ERP-DEMO/CSS ./CSS
+COPY ERP-DEMO/server.js ./
+COPY ERP-DEMO/Index.html ./
+COPY ERP-DEMO/docker-entrypoint.sh ./
+COPY ERP-DEMO/tsconfig.json ./
 
 RUN chmod +x ./docker-entrypoint.sh
 

@@ -5,7 +5,7 @@
 # Builds with Maven from the official Maven 3.9.9 image to a Spring "fat" jar,
 # then runs it with the eclipse-temurin 17 JRE.
 #
-#   docker build -t erp-api:latest -f Demo_phase/api/Dockerfile .
+#   docker build -t erp-api:latest -f api/Dockerfile .
 #   docker run --rm -p 8080:8080 \
 #     -e PORT=8080 \
 #     -e ERP_PHASE_URL=http://phasedb-hs:8484 \
@@ -23,11 +23,11 @@ FROM maven:3.9.9-eclipse-temurin-17 AS builder
 WORKDIR /build
 
 # Resolve plugins and dependencies before copying source for better caching.
-COPY Demo_phase/api/pom.xml ./
+COPY api/pom.xml ./
 RUN mvn -B dependency:go-offline
 
 # Source next, so incremental builds skip unchanged packages.
-COPY Demo_phase/api/src ./src
+COPY api/src ./src
 
 RUN mvn -B package -DskipTests -Dmaven.test.skip=true
 

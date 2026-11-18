@@ -1,0 +1,3 @@
+[submodule "phasedb"]
+	path = phasedb
+	url = https://github.com/AmeliaUnderscore/phasedb.git
